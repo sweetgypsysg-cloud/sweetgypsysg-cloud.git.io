@@ -20,7 +20,10 @@ function initHamburger() {
   const navMenu = document.getElementById('nav-menu');
   if (!hamburger || !navMenu) return;
 
-  const isMobileMenu = () => window.innerWidth <= 900;
+  const mobileMenuQuery = window.matchMedia('(max-width: 900px)');
+  const isMobileMenu = () => mobileMenuQuery.matches;
+  hamburger.setAttribute('aria-controls', navMenu.id);
+  hamburger.setAttribute('aria-expanded', 'false');
 
   /*
    * CRITICAL FIX: backdrop-filter on <nav> creates a new containing block,
@@ -73,22 +76,29 @@ function initHamburger() {
     document.body.appendChild(overlay);
   }
 
+  function syncMenuState(isOpen) {
+    hamburger.classList.toggle('active', isOpen);
+    navMenu.classList.toggle('open', isOpen);
+    overlay.classList.toggle('active', isOpen);
+    document.body.classList.toggle('menu-open', isOpen);
+    hamburger.setAttribute('aria-expanded', String(isOpen));
+    hamburger.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+
+    if (isMobileMenu()) {
+      navMenu.setAttribute('aria-hidden', String(!isOpen));
+    } else {
+      navMenu.removeAttribute('aria-hidden');
+    }
+  }
+
   function openMenu() {
     moveMenuToBody();
     moveHamburgerToBody();
-    hamburger.classList.add('active');
-    navMenu.classList.add('open');
-    overlay.classList.add('active');
-    document.body.classList.add('menu-open');
-    hamburger.setAttribute('aria-label', 'ปิดเมนู');
+    syncMenuState(true);
   }
 
   function closeMenu() {
-    hamburger.classList.remove('active');
-    navMenu.classList.remove('open');
-    overlay.classList.remove('active');
-    document.body.classList.remove('menu-open');
-    hamburger.setAttribute('aria-label', 'เปิดเมนู');
+    syncMenuState(false);
   }
 
   // Toggle menu on hamburger click
@@ -116,15 +126,27 @@ function initHamburger() {
     }
   });
 
-  // Handle window resize
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 900) {
+  function syncResponsiveLayout() {
+    if (isMobileMenu()) {
+      moveMenuToBody();
+      moveHamburgerToBody();
+      syncMenuState(navMenu.classList.contains('open'));
+    } else {
       closeMenu();
       moveMenuToNav();
       moveHamburgerToNav();
-    } else {
-      moveMenuToBody();
-      moveHamburgerToBody();
+      navMenu.removeAttribute('aria-hidden');
     }
-  });
+  }
+
+  syncResponsiveLayout();
+
+  if (typeof mobileMenuQuery.addEventListener === 'function') {
+    mobileMenuQuery.addEventListener('change', syncResponsiveLayout);
+  } else {
+    mobileMenuQuery.addListener(syncResponsiveLayout);
+  }
+
+  // Keep fixed elements aligned when browser chrome changes viewport dimensions.
+  window.addEventListener('resize', syncResponsiveLayout);
 }
