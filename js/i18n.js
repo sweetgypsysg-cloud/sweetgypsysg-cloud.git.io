@@ -118,6 +118,8 @@ const i18n = {
     tab_necklace: 'สร้อยคอ',
     tab_earrings: 'ต่างหู',
     tab_bracelets: 'กำไล',
+    tab_all: 'ทั้งหมด',
+    view_all_btn: 'ดูทั้งหมด',
   },
   en: {
     nav_home: 'Home',
@@ -232,6 +234,8 @@ const i18n = {
     tab_necklace: 'Necklace',
     tab_earrings: 'Earrings',
     tab_bracelets: 'Bracelets',
+    tab_all: 'All',
+    view_all_btn: 'View All',
   },
   zh: {
     nav_home: '首页',
@@ -346,6 +350,8 @@ const i18n = {
     tab_necklace: '项链',
     tab_earrings: '耳环',
     tab_bracelets: '手镯',
+    tab_all: '全部',
+    view_all_btn: '查看全部',
   },
   ja: {
     nav_home: 'ホーム',
@@ -460,6 +466,8 @@ const i18n = {
     tab_necklace: 'ネックレス',
     tab_earrings: 'ピアス',
     tab_bracelets: 'ブレスレット',
+    tab_all: 'すべて',
+    view_all_btn: 'すべて見る',
   }
 };
 

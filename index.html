@@ -63,11 +63,11 @@
   <link rel="stylesheet" href="css/animations.css">
   <link rel="stylesheet" href="css/nav.css">
   <link rel="stylesheet" href="css/hero.css">
-  <link rel="stylesheet" href="css/collections.css">
+  <link rel="stylesheet" href="css/collections.css?v=3">
   <link rel="stylesheet" href="css/sections.css">
   <link rel="stylesheet" href="css/contact.css">
   <link rel="stylesheet" href="css/modal.css">
-  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/responsive.css?v=3">
 
   <!-- Web3Forms client script — handles hCaptcha automatically, no site key needed -->
   <script src="https://web3forms.com/client/script.js" async defer></script>
@@ -213,7 +213,11 @@
 
     <!-- COLLECTION TABS -->
     <div class="collection-tabs-ui" id="collection-tabs-ui">
-      <button class="collection-tab active" data-tab="rings">
+      <button class="collection-tab active" data-tab="all">
+        <div class="tab-img" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem">✦</div>
+        <span data-i18n="tab_all">All</span>
+      </button>
+      <button class="collection-tab" data-tab="rings">
         <div class="tab-img"><img src="img/ring.png" alt="Rings"></div>
         <span data-i18n="tab_rings">Rings</span>
       </button>
@@ -540,9 +544,9 @@
   <!-- ═══════════════════════════════════════════════════════════
        SCRIPTS (ordered by dependency)
        ═══════════════════════════════════════════════════════════ -->
-  <script src="js/i18n.js"></script>
+  <script src="js/i18n.js?v=3"></script>
   <script src="js/nav.js"></script>
-  <script src="js/catalog.js"></script>
+  <script src="js/catalog.js?v=3"></script>
   <script src="js/lang.js"></script>
   <script src="js/modal.js"></script>
   <script src="js/contact.js"></script>

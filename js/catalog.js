@@ -164,12 +164,22 @@ function buildCategoryColumn(cat, products) {
   const t = i18n[currentLang] || i18n.en;
   const catName = getCategoryName(cat);
   const itemWord = t.collection_items || 'items';
+  const viewAllText = t.view_all_btn || 'View All';
 
   let cardsHTML = '';
   if (products.length > 0) {
     cardsHTML = products.map(p => buildProductCard(p)).join('');
   } else {
     cardsHTML = `<div class="collection-empty">${t.collection_empty || 'Coming soon…'}</div>`;
+  }
+  
+  let viewAllHTML = '';
+  if (products.length > 4) {
+    viewAllHTML = `
+      <div class="view-all-btn-wrapper">
+        <button class="view-all-btn" data-target-tab="${cat.id}">${viewAllText} ${catName} &rarr;</button>
+      </div>
+    `;
   }
 
   return `
@@ -179,9 +189,14 @@ function buildCategoryColumn(cat, products) {
         <h3>${catName}</h3>
         <span class="col-count">${products.length} ${itemWord}</span>
       </div>
-      <div class="collection-column-items">
-        ${cardsHTML}
+      <div class="slider-wrapper">
+        <button class="slider-arrow slider-arrow-left">❮</button>
+        <div class="collection-column-items">
+          ${cardsHTML}
+        </div>
+        <button class="slider-arrow slider-arrow-right">❯</button>
       </div>
+      ${viewAllHTML}
     </div>
   `;
 }
@@ -224,12 +239,12 @@ function renderCatalog() {
   // Build 4 category columns
   let columnsHTML = '';
   CATEGORIES.forEach((cat, idx) => {
-    const isActive = idx === 0 ? ' active' : '';
-    const columnStr = buildCategoryColumn(cat, grouped[cat.id]);
-    columnsHTML += columnStr.replace('class="collection-column"', `class="collection-column${isActive}"`);
+    columnsHTML += buildCategoryColumn(cat, grouped[cat.id]);
   });
 
   container.innerHTML = columnsHTML;
+  // Set default view to "all" mode
+  container.classList.add('view-all');
 
   // Setup image error handlers
   container.querySelectorAll('.product-img-dynamic').forEach(img => {
@@ -238,6 +253,8 @@ function renderCatalog() {
 
   // Re-attach click handlers
   initProductCards();
+  initViewAllButtons();
+  initSliders();
 
   // Log summary per category
   const summary = CATEGORIES.map(c => `${c.id}: ${grouped[c.id].length}`).join(', ');
@@ -305,19 +322,64 @@ function initCollectionTabs() {
 
       // Update active tab styling
       tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
+      const activeTab = e.currentTarget;
+      activeTab.classList.add('active');
 
-      const catId = tab.getAttribute('data-tab');
+      const catId = activeTab.getAttribute('data-tab');
 
       // Update active column visibility
+      const columnsContainer = document.getElementById('collections-columns');
       const columns = document.querySelectorAll('.collection-column');
-      columns.forEach(col => {
-        if (col.getAttribute('data-category') === catId) {
-          col.classList.add('active');
-        } else {
-          col.classList.remove('active');
-        }
-      });
+      
+      if (catId === 'all') {
+        columnsContainer.classList.add('view-all');
+        columns.forEach(col => col.classList.remove('active'));
+      } else {
+        columnsContainer.classList.remove('view-all');
+        columns.forEach(col => {
+          if (col.getAttribute('data-category') === catId) {
+            col.classList.add('active');
+          } else {
+            col.classList.remove('active');
+          }
+        });
+      }
+    });
+  });
+}
+
+function initViewAllButtons() {
+  document.querySelectorAll('.view-all-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const targetCat = e.target.getAttribute('data-target-tab');
+      const targetTab = document.querySelector(`.collection-tab[data-tab="${targetCat}"]`);
+      if (targetTab) {
+        targetTab.click();
+        document.getElementById('collections').scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  });
+}
+
+function initSliders() {
+  document.querySelectorAll('.slider-wrapper').forEach(wrapper => {
+    const container = wrapper.querySelector('.collection-column-items');
+    const leftBtn = wrapper.querySelector('.slider-arrow-left');
+    const rightBtn = wrapper.querySelector('.slider-arrow-right');
+
+    if (!container || !leftBtn || !rightBtn) return;
+
+    leftBtn.addEventListener('click', () => {
+      // Get width of first child for accurate scrolling
+      const firstChild = container.querySelector('.product-card');
+      const scrollAmount = firstChild ? firstChild.offsetWidth + 24 : 300; // 24px is gap
+      container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    });
+
+    rightBtn.addEventListener('click', () => {
+      const firstChild = container.querySelector('.product-card');
+      const scrollAmount = firstChild ? firstChild.offsetWidth + 24 : 300;
+      container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     });
   });
 }
