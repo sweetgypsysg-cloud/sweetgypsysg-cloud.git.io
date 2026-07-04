@@ -20,15 +20,17 @@ function initHamburger() {
   const navMenu = document.getElementById('nav-menu');
   if (!hamburger || !navMenu) return;
 
+  const isMobileMenu = () => window.innerWidth <= 768;
+
   /*
    * CRITICAL FIX: backdrop-filter on <nav> creates a new containing block,
    * which traps position:fixed children (nav-links) inside the nav height.
-   * Solution: Move nav-links out of <nav> and append to <body> so that
-   * position:fixed works relative to the viewport.
+   * Solution: Move nav-links AND hamburger to <body> on mobile so
+   * position:fixed works relative to viewport, and hamburger stays clickable
+   * above the full-screen menu panel.
    */
-  const isMobileMenu = () => window.innerWidth <= 768;
 
-  // Move nav-links to body on load if mobile
+  // Move nav-links to body on mobile
   function moveMenuToBody() {
     if (isMobileMenu() && navMenu.parentElement !== document.body) {
       document.body.appendChild(navMenu);
@@ -40,14 +42,30 @@ function initHamburger() {
     const nav = document.querySelector('nav');
     const navRight = document.querySelector('.nav-right');
     if (!isMobileMenu() && navMenu.parentElement === document.body && nav) {
-      // Insert before nav-right to maintain correct order
       nav.insertBefore(navMenu, navRight);
     }
   }
 
-  moveMenuToBody();
+  // Move hamburger to body on mobile (so it's above the menu panel)
+  function moveHamburgerToBody() {
+    if (isMobileMenu() && hamburger.parentElement !== document.body) {
+      document.body.appendChild(hamburger);
+    }
+  }
 
-  // Create overlay element for closing menu by tapping outside
+  // Move hamburger back to nav on desktop
+  function moveHamburgerToNav() {
+    const nav = document.querySelector('nav');
+    const navRight = document.querySelector('.nav-right');
+    if (!isMobileMenu() && hamburger.parentElement === document.body && nav) {
+      nav.insertBefore(hamburger, navRight);
+    }
+  }
+
+  moveMenuToBody();
+  moveHamburgerToBody();
+
+  // Create overlay element
   let overlay = document.querySelector('.nav-overlay');
   if (!overlay) {
     overlay = document.createElement('div');
@@ -56,7 +74,8 @@ function initHamburger() {
   }
 
   function openMenu() {
-    moveMenuToBody(); // ensure it's in body
+    moveMenuToBody();
+    moveHamburgerToBody();
     hamburger.classList.add('active');
     navMenu.classList.add('open');
     overlay.classList.add('active');
@@ -97,13 +116,15 @@ function initHamburger() {
     }
   });
 
-  // Handle window resize: move menu between body and nav
+  // Handle window resize
   window.addEventListener('resize', () => {
     if (window.innerWidth > 768) {
       closeMenu();
       moveMenuToNav();
+      moveHamburgerToNav();
     } else {
       moveMenuToBody();
+      moveHamburgerToBody();
     }
   });
 }

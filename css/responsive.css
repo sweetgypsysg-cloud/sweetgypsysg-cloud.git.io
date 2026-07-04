@@ -76,10 +76,14 @@
     flex: 1;
   }
 
+  /* Hamburger is moved to <body> by JS — needs fixed positioning */
   .nav-hamburger {
     display: flex;
-    order: 3;
-    margin-left: 1rem;
+    position: fixed;
+    top: 1rem;
+    right: 1.5rem;
+    z-index: 1020;
+    margin: 0;
   }
 
   .nav-right {
@@ -304,6 +308,11 @@
 @media (max-width: 480px) {
   nav {
     padding: .8rem 1rem;
+  }
+
+  .nav-hamburger {
+    top: .8rem;
+    right: 1rem;
   }
 
   .nav-logo {
