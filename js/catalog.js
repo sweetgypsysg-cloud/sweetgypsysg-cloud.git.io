@@ -140,7 +140,12 @@ function parseProductRow(row, index, imgColIndex) {
   const id = row.c[0]?.v?.toString() || `product-${index}`;
   const name = row.c[1]?.v || '';
   const price = row.c[2]?.v || 'N/A';
-  const image = optimizeImageURL(row.c[3]?.v, id);
+  const rawImage = row.c[3]?.v || '';
+  let images = [];
+  if (typeof rawImage === 'string') {
+    images = rawImage.split(/[\n,]/).map(u => optimizeImageURL(u.trim(), id)).filter(Boolean);
+  }
+  const image = images.length > 0 ? images[0] : '';
   const desc = row.c[4]?.v || '';
   const dmType = row.c[6]?.v || 'whatsapp';
 
@@ -151,7 +156,7 @@ function parseProductRow(row, index, imgColIndex) {
   const category = catObj ? getCategoryName(catObj) : '';
 
   return {
-    id, name, price, desc, image, category,
+    id, name, price, desc, image, images, category,
     catId: catId || 'other',
     ph: catObj ? catObj.ph : 'ph-2',
     dmType: dmType,
@@ -369,8 +374,33 @@ function initSliders() {
 
     if (!container || !leftBtn || !rightBtn) return;
 
+    // --- Smart Arrow Visibility ---
+    const updateArrows = () => {
+      const maxScrollLeft = container.scrollWidth - container.clientWidth;
+      if (container.scrollLeft <= 5) {
+        leftBtn.style.opacity = '0';
+        leftBtn.style.pointerEvents = 'none';
+      } else {
+        leftBtn.style.opacity = '1';
+        leftBtn.style.pointerEvents = 'auto';
+      }
+      
+      if (maxScrollLeft <= 0 || container.scrollLeft >= maxScrollLeft - 5) {
+        rightBtn.style.opacity = '0';
+        rightBtn.style.pointerEvents = 'none';
+      } else {
+        rightBtn.style.opacity = '1';
+        rightBtn.style.pointerEvents = 'auto';
+      }
+    };
+
+    container.addEventListener('scroll', updateArrows);
+    window.addEventListener('resize', updateArrows);
+    // Initial check after images load
+    setTimeout(updateArrows, 150);
+
+    // --- Arrow Click Scrolling ---
     leftBtn.addEventListener('click', () => {
-      // Get width of first child for accurate scrolling
       const firstChild = container.querySelector('.product-card');
       const scrollAmount = firstChild ? firstChild.offsetWidth + 24 : 300; // 24px is gap
       container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
@@ -381,5 +411,61 @@ function initSliders() {
       const scrollAmount = firstChild ? firstChild.offsetWidth + 24 : 300;
       container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     });
+
+    // --- Mouse Drag-to-Scroll ---
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+    let isDragging = false;
+
+    container.addEventListener('mousedown', (e) => {
+      isDown = true;
+      isDragging = false;
+      container.classList.add('active-drag');
+      startX = e.pageX - container.offsetLeft;
+      scrollLeft = container.scrollLeft;
+      
+      // Temporarily disable smooth scroll & snap for instant drag
+      container.style.scrollSnapType = 'none';
+      container.style.scrollBehavior = 'auto'; 
+    });
+
+    container.addEventListener('mouseleave', () => {
+      if (!isDown) return;
+      isDown = false;
+      container.classList.remove('active-drag');
+      container.style.scrollSnapType = '';
+      container.style.scrollBehavior = '';
+      updateArrows();
+    });
+
+    container.addEventListener('mouseup', () => {
+      isDown = false;
+      container.classList.remove('active-drag');
+      container.style.scrollSnapType = '';
+      container.style.scrollBehavior = '';
+      updateArrows();
+    });
+
+    container.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      
+      const x = e.pageX - container.offsetLeft;
+      // Only count as dragging if moved more than 5px
+      if (Math.abs(x - startX) > 5) {
+        isDragging = true;
+      }
+      const walk = (x - startX) * 1.5; // Scroll speed multiplier
+      container.scrollLeft = scrollLeft - walk;
+    });
+
+    // Prevent click on products when dragging
+    container.addEventListener('click', (e) => {
+      if (isDragging) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, { capture: true });
   });
 }

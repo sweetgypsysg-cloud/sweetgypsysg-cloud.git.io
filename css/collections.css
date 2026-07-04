@@ -149,6 +149,16 @@
   scroll-snap-type: x mandatory;
   padding-bottom: 1rem;
   gap: 1.5rem;
+  cursor: grab; /* Show grab cursor */
+}
+
+.collections-columns.view-all .collection-column-items.active-drag {
+  cursor: grabbing;
+}
+
+.collections-columns.view-all .collection-column-items.active-drag .product-card {
+  pointer-events: none; /* Prevent clicks while dragging */
+  transition: none; /* Disable hover transition while dragging */
 }
 
 .collections-columns.view-all .collection-column-items::-webkit-scrollbar {
