@@ -93,13 +93,16 @@
     right: 0;
     bottom: 0;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
     background: rgba(250, 246, 240, 0.98);
     backdrop-filter: blur(16px);
-    padding: 6rem 2rem 2rem;
-    gap: 1.8rem;
+    padding: 2rem;
+    gap: 2rem;
     transform: translateX(100%);
-    transition: transform .35s ease;
-    z-index: 100;
+    transition: transform .35s cubic-bezier(.4, 0, .2, 1);
+    z-index: 1010;
+    overflow-y: auto;
   }
 
   .nav-links.open {
@@ -107,10 +110,13 @@
   }
 
   .nav-links a {
-    font-size: 1rem;
+    font-size: 1.2rem;
     letter-spacing: .15em;
+    padding: .5rem 0;
   }
 
+  /* Show lang switcher inside the mobile menu */
+  .nav-links.open ~ .nav-right .lang-switcher,
   .lang-switcher {
     margin-right: 0;
   }

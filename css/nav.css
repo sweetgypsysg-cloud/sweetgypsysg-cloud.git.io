@@ -8,7 +8,7 @@ nav {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 100;
+  z-index: 1000;
   padding: 1.25rem 3rem;
   display: flex;
   align-items: center;
@@ -145,7 +145,8 @@ nav {
   border: none;
   background: transparent;
   padding: 0;
-  z-index: 110;
+  z-index: 1020;
+  position: relative;
 }
 
 .nav-hamburger span {
@@ -167,4 +168,28 @@ nav {
 
 .nav-hamburger.active span:nth-child(3) {
   transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ─── MOBILE MENU OVERLAY (backdrop) ─── */
+.nav-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1005;
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+
+.nav-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* ─── BODY SCROLL LOCK ─── */
+body.menu-open {
+  overflow: hidden;
 }
