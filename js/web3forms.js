@@ -74,20 +74,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Step 1: Prevent page reload (critical for GitHub Pages)
     e.preventDefault();
 
-    // Step 2: Verify hCaptcha has been completed
+    // Step 2: Check hCaptcha (skip gracefully if widget didn't load)
     var hCaptchaInput = this.querySelector('[name="h-captcha-response"]');
-    if (!hCaptchaInput || !hCaptchaInput.value) {
+    if (hCaptchaInput && !hCaptchaInput.value) {
+      // Captcha widget IS on the page but user hasn't completed it
       showStatus('error', 'Please complete the captcha verification before submitting.');
       return;
     }
 
-    // Step 3: Collect form data
-    var formData = new FormData(this);
-
-    // Step 4: Append Web3Forms access key
-    formData.append('access_key', 'a8dbd6ab-2073-4472-ba30-d7dbd27f66eb');
-
-    // Step 5: Disable submit button to prevent double-clicks
+    // Step 3: Disable submit button to prevent double-clicks
     if (submitBtn) {
       submitBtn.disabled = true;
       submitBtn.dataset.originalText = submitBtn.innerHTML;
@@ -95,17 +90,40 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     hideStatus();
 
-    // Step 6: Send to Web3Forms
-    // NOTE: Do NOT set Content-Type header — browser auto-sets
-    //       multipart/form-data boundary. Setting it manually causes CORS errors.
+    // Step 4: Build JSON payload (Web3Forms recommended format)
+    var payload = {
+      access_key: '5a80bf1a-b8c4-4432-a36a-a2ea9b21797f'
+    };
+
+    // Collect all form fields
+    var formData = new FormData(this);
+    formData.forEach(function (value, key) {
+      if (key !== 'botcheck' || value) {
+        payload[key] = value;
+      }
+    });
+
+    // Include hCaptcha token if available
+    if (hCaptchaInput && hCaptchaInput.value) {
+      payload['h-captcha-response'] = hCaptchaInput.value;
+    }
+
+    console.log('[Web3Forms] Submitting payload…', Object.keys(payload));
+
+    // Step 5: Send to Web3Forms as JSON
     fetch('https://api.web3forms.com/submit', {
       method: 'POST',
-      body: formData
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(payload)
     })
       .then(function (response) {
         return response.json();
       })
       .then(function (data) {
+        console.log('[Web3Forms] Response:', data);
         if (data.success) {
           // ── Success: show the success panel ──
           form.reset();
