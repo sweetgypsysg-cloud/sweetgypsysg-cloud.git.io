@@ -84,6 +84,10 @@
     display: none;
   }
 
+  .lang-switcher {
+    margin-right: 2.5rem;
+  }
+
   /* SIDEBAR MENU — slides from right, covers ~65% width on tablet */
   .nav-links {
     display: flex;
@@ -220,7 +224,7 @@
   }
 
   .lang-switcher {
-    margin-right: 0;
+    margin-right: 2rem;
   }
 
   /* SIDEBAR narrower on phone */
@@ -400,6 +404,7 @@
   .lang-switcher {
     gap: 2px;
     padding: 2px;
+    margin-right: 1.75rem;
   }
 
   .lang-btn {
