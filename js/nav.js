@@ -20,6 +20,33 @@ function initHamburger() {
   const navMenu = document.getElementById('nav-menu');
   if (!hamburger || !navMenu) return;
 
+  /*
+   * CRITICAL FIX: backdrop-filter on <nav> creates a new containing block,
+   * which traps position:fixed children (nav-links) inside the nav height.
+   * Solution: Move nav-links out of <nav> and append to <body> so that
+   * position:fixed works relative to the viewport.
+   */
+  const isMobileMenu = () => window.innerWidth <= 768;
+
+  // Move nav-links to body on load if mobile
+  function moveMenuToBody() {
+    if (isMobileMenu() && navMenu.parentElement !== document.body) {
+      document.body.appendChild(navMenu);
+    }
+  }
+
+  // Move nav-links back to nav on desktop
+  function moveMenuToNav() {
+    const nav = document.querySelector('nav');
+    const navRight = document.querySelector('.nav-right');
+    if (!isMobileMenu() && navMenu.parentElement === document.body && nav) {
+      // Insert before nav-right to maintain correct order
+      nav.insertBefore(navMenu, navRight);
+    }
+  }
+
+  moveMenuToBody();
+
   // Create overlay element for closing menu by tapping outside
   let overlay = document.querySelector('.nav-overlay');
   if (!overlay) {
@@ -29,6 +56,7 @@ function initHamburger() {
   }
 
   function openMenu() {
+    moveMenuToBody(); // ensure it's in body
     hamburger.classList.add('active');
     navMenu.classList.add('open');
     overlay.classList.add('active');
@@ -69,10 +97,13 @@ function initHamburger() {
     }
   });
 
-  // Close menu on window resize if we go back to desktop width
+  // Handle window resize: move menu between body and nav
   window.addEventListener('resize', () => {
-    if (window.innerWidth > 768 && navMenu.classList.contains('open')) {
+    if (window.innerWidth > 768) {
       closeMenu();
+      moveMenuToNav();
+    } else {
+      moveMenuToBody();
     }
   });
 }
