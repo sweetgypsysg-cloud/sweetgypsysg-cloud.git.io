@@ -60,20 +60,14 @@
 }
 
 /* ============================================================
-   RESPONSIVE — Mobile (≤ 768px)
+   RESPONSIVE — Tablet Portrait (≤ 900px)
+   Hamburger menu as sidebar for tablets
    ============================================================ */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
 
-  /* NAV */
+  /* NAV — show hamburger on tablet */
   nav {
-    padding: 1rem 1.5rem;
-    flex-wrap: wrap;
-    /* allow wrapping if absolutely necessary */
-  }
-
-  .nav-logo {
-    order: 1;
-    flex: 1;
+    padding: 1rem 2rem;
   }
 
   /* Hamburger is moved to <body> by JS — needs fixed positioning */
@@ -81,34 +75,38 @@
     display: flex;
     position: fixed;
     top: 1rem;
-    right: 1.5rem;
+    right: 2rem;
     z-index: 1020;
     margin: 0;
   }
 
-  .nav-right {
-    order: 2;
+  .nav-cta {
+    display: none;
   }
 
-  /* nav-links is moved to <body> by JS to escape backdrop-filter containment */
+  /* SIDEBAR MENU — slides from right, covers ~65% width on tablet */
   .nav-links {
     display: flex;
     position: fixed;
     top: 0;
-    left: 0;
-    width: 100%;
+    right: 0;
+    left: auto;
+    width: 320px;
+    max-width: 75vw;
     height: 100%;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     background: rgba(250, 246, 240, 0.98);
     backdrop-filter: blur(16px);
-    padding: 2rem;
+    padding: 4rem 2rem 2rem;
     gap: 2rem;
     transform: translateX(100%);
     transition: transform .35s cubic-bezier(.4, 0, .2, 1);
     z-index: 1015;
     overflow-y: auto;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.08);
+    border-left: 1px solid rgba(201, 169, 110, 0.15);
   }
 
   .nav-links.open {
@@ -118,28 +116,128 @@
   .nav-links li {
     margin: 0;
     text-align: center;
+    width: 100%;
   }
 
   .nav-links a {
-    font-size: 1.2rem;
-    letter-spacing: .15em;
-    padding: .5rem 0;
-    display: inline-block;
+    font-size: 1.1rem;
+    letter-spacing: .12em;
+    padding: .6rem 1rem;
+    display: block;
+    border-radius: 6px;
+    transition: color .3s, background .3s;
+  }
+
+  .nav-links a:hover {
+    background: rgba(201, 169, 110, 0.1);
+  }
+
+  /* HERO — keep 2 columns for tablet portrait */
+  .hero {
+    grid-template-columns: 1fr 1fr;
+    min-height: auto;
+  }
+
+  .hero-left {
+    padding: 3rem 2rem 2.5rem;
+  }
+
+  .hero-title {
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+  }
+
+  .hero-sub {
+    max-width: 100%;
+  }
+
+  /* SECTIONS */
+  section {
+    padding: 4rem 2rem;
+  }
+
+  .section-title {
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+  }
+
+  .collections-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .inspi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .review-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* STORY */
+  .story {
+    gap: 2.5rem;
+  }
+
+  /* LINE CTA */
+  .line-cta {
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem 2rem;
+    align-items: center;
+  }
+
+  /* CONTACT */
+  .contact {
+    gap: 3rem;
+  }
+
+  .contact-form-title {
+    font-size: 2rem;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE — Mobile (≤ 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+
+  /* NAV */
+  nav {
+    padding: 1rem 1.5rem;
+  }
+
+  .nav-logo {
+    flex: 1;
+  }
+
+  .nav-hamburger {
+    right: 1.5rem;
+  }
+
+  .nav-right {
+    order: 2;
   }
 
   .lang-switcher {
     margin-right: 0;
   }
 
-  /* Hide extra nav-cta on mobile because we have floating buttons */
-  .nav-cta {
-    display: none;
+  /* SIDEBAR narrower on phone */
+  .nav-links {
+    width: 280px;
+    max-width: 80vw;
+    padding: 5rem 1.5rem 2rem;
+    gap: 1.5rem;
   }
 
-  /* HERO */
+  .nav-links a {
+    font-size: 1rem;
+    letter-spacing: .12em;
+    padding: .5rem .8rem;
+  }
+
+  /* HERO — single column on phone */
   .hero {
     grid-template-columns: 1fr;
-    min-height: auto;
   }
 
   .hero-left {
@@ -154,10 +252,6 @@
 
   .hero-title {
     font-size: clamp(2rem, 8vw, 3rem);
-  }
-
-  .hero-sub {
-    max-width: 100%;
   }
 
   .hero-stats {
@@ -179,11 +273,6 @@
     font-size: clamp(1.8rem, 6vw, 2.5rem);
   }
 
-  .collections-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .collections-columns {
     display: block;
   }
@@ -196,10 +285,6 @@
   .product-grid {
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
-  }
-
-  .inspi-grid {
-    grid-template-columns: 1fr;
   }
 
   .review-grid {
@@ -217,14 +302,6 @@
     gap: 2.5rem;
   }
 
-  /* LINE CTA */
-  .line-cta {
-    flex-direction: column;
-    text-align: center;
-    padding: 2rem 1.5rem;
-    align-items: center;
-  }
-
   .line-cta-text {
     font-size: 1.3rem;
   }
@@ -233,10 +310,6 @@
   .contact {
     grid-template-columns: 1fr;
     gap: 3rem;
-  }
-
-  .contact-form-title {
-    font-size: 2rem;
   }
 
   .form-row {
@@ -327,6 +400,18 @@
   .lang-btn {
     font-size: .6rem;
     padding: .25rem .45rem;
+  }
+
+  /* SIDEBAR even narrower on small phone */
+  .nav-links {
+    width: 240px;
+    max-width: 85vw;
+    padding: 4.5rem 1.2rem 2rem;
+  }
+
+  .nav-links a {
+    font-size: .9rem;
+    padding: .45rem .6rem;
   }
 
   section {

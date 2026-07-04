@@ -20,7 +20,7 @@ function initHamburger() {
   const navMenu = document.getElementById('nav-menu');
   if (!hamburger || !navMenu) return;
 
-  const isMobileMenu = () => window.innerWidth <= 768;
+  const isMobileMenu = () => window.innerWidth <= 900;
 
   /*
    * CRITICAL FIX: backdrop-filter on <nav> creates a new containing block,
@@ -118,7 +118,7 @@ function initHamburger() {
 
   // Handle window resize
   window.addEventListener('resize', () => {
-    if (window.innerWidth > 768) {
+    if (window.innerWidth > 900) {
       closeMenu();
       moveMenuToNav();
       moveHamburgerToNav();
