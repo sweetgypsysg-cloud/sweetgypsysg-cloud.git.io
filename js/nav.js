@@ -114,9 +114,25 @@ function initHamburger() {
   // Close menu when overlay is clicked
   overlay.addEventListener('click', closeMenu);
 
-  // Close menu when a nav link is clicked
+  // Close menu when a nav link is clicked, then smooth-scroll to target
   navMenu.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', closeMenu);
+    link.addEventListener('click', (e) => {
+      closeMenu();
+      const href = link.getAttribute('href');
+      if (href && href.startsWith('#') && href.length > 1) {
+        e.preventDefault();
+        const target = document.querySelector(href);
+        if (target) {
+          // Small delay so the menu close animation doesn't interfere
+          setTimeout(() => {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 50);
+        }
+      } else if (href === '#') {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
   });
 
   // Close menu on Escape key

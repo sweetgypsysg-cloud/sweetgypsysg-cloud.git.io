@@ -200,6 +200,9 @@ function buildCategoryColumn(cat, products) {
           ${cardsHTML}
         </div>
         <button class="slider-arrow slider-arrow-right">❯</button>
+        <div class="slider-scrollbar">
+          <div class="slider-scrollbar-thumb"></div>
+        </div>
       </div>
       ${viewAllHTML}
     </div>
@@ -256,8 +259,7 @@ function renderCatalog() {
     setupImageError(img, img.dataset.productId);
   });
 
-  // Re-attach click handlers
-  initProductCards();
+  // Re-attach view-all buttons (product cards use delegation, no re-bind needed)
   initViewAllButtons();
   initSliders();
 
@@ -295,25 +297,30 @@ async function fetchCatalog() {
   }
 }
 
-/* ─── PRODUCT CARD BUTTONS (static fallback cards) ─── */
+/* ─── PRODUCT CARD BUTTONS (event delegation — binds once) ─── */
+let _productCardsDelegated = false;
 function initProductCards() {
-  document.querySelectorAll('.product-overlay-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      // If this card has sheet data attached, open modal instead
-      const card = e.target.closest('.product-card');
-      if (card && card.dataset.sheetProduct) {
-        try {
-          const product = JSON.parse(card.dataset.sheetProduct);
-          openProductModal(product);
-        } catch (err) {
-          console.error('[CARD] Failed to parse product data', err);
-        }
-        return;
+  if (_productCardsDelegated) return; // Already bound
+  _productCardsDelegated = true;
+
+  // Use event delegation on <body> so dynamically created cards are handled
+  document.body.addEventListener('click', (e) => {
+    const btn = e.target.closest('.product-overlay-btn');
+    if (!btn) return;
+
+    const card = btn.closest('.product-card');
+    if (card && card.dataset.sheetProduct) {
+      try {
+        const product = JSON.parse(card.dataset.sheetProduct);
+        openProductModal(product);
+      } catch (err) {
+        console.error('[CARD] Failed to parse product data', err);
       }
-      // Fallback: show alert for static cards
-      const t = i18n[currentLang];
-      alert(t ? t.alert_order : i18n.en.alert_order);
-    });
+      return;
+    }
+    // Fallback: show alert for static cards
+    const t = i18n[currentLang];
+    alert(t ? t.alert_order : i18n.en.alert_order);
   });
 }
 
@@ -371,10 +378,12 @@ function initSliders() {
     const container = wrapper.querySelector('.collection-column-items');
     const leftBtn = wrapper.querySelector('.slider-arrow-left');
     const rightBtn = wrapper.querySelector('.slider-arrow-right');
+    const scrollbar = wrapper.querySelector('.slider-scrollbar');
+    const scrollbarThumb = wrapper.querySelector('.slider-scrollbar-thumb');
 
     if (!container || !leftBtn || !rightBtn) return;
 
-    // --- Smart Arrow Visibility ---
+    // --- Smart Arrow Visibility + Scrollbar Update ---
     const updateArrows = () => {
       const maxScrollLeft = container.scrollWidth - container.clientWidth;
       if (container.scrollLeft <= 5) {
@@ -392,12 +401,70 @@ function initSliders() {
         rightBtn.style.opacity = '1';
         rightBtn.style.pointerEvents = 'auto';
       }
+
+      // --- Scrollbar progress update ---
+      if (scrollbar && scrollbarThumb) {
+        if (maxScrollLeft <= 0) {
+          scrollbar.style.display = 'none';
+        } else {
+          scrollbar.style.display = '';
+          const thumbRatio = container.clientWidth / container.scrollWidth;
+          const thumbWidth = Math.max(thumbRatio * 100, 15); // min 15%
+          const scrollRatio = container.scrollLeft / maxScrollLeft;
+          const thumbLeft = scrollRatio * (100 - thumbWidth);
+          scrollbarThumb.style.width = thumbWidth + '%';
+          scrollbarThumb.style.left = thumbLeft + '%';
+        }
+      }
     };
 
     container.addEventListener('scroll', updateArrows);
     window.addEventListener('resize', updateArrows);
     // Initial check after images load
     setTimeout(updateArrows, 150);
+
+    // --- Scrollbar Drag Interaction ---
+    if (scrollbar && scrollbarThumb) {
+      let sbDragging = false;
+      let sbStartX = 0;
+      let sbStartScrollLeft = 0;
+
+      scrollbarThumb.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        sbDragging = true;
+        sbStartX = e.clientX;
+        sbStartScrollLeft = container.scrollLeft;
+        scrollbarThumb.classList.add('dragging');
+        document.body.style.userSelect = 'none';
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!sbDragging) return;
+        e.preventDefault();
+        const dx = e.clientX - sbStartX;
+        const scrollbarWidth = scrollbar.offsetWidth;
+        const maxScrollLeft = container.scrollWidth - container.clientWidth;
+        const scrollRatio = dx / scrollbarWidth;
+        container.scrollLeft = sbStartScrollLeft + scrollRatio * maxScrollLeft;
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (!sbDragging) return;
+        sbDragging = false;
+        scrollbarThumb.classList.remove('dragging');
+        document.body.style.userSelect = '';
+      });
+
+      // --- Click on track to jump ---
+      scrollbar.addEventListener('click', (e) => {
+        if (e.target === scrollbarThumb) return; // ignore thumb clicks
+        const rect = scrollbar.getBoundingClientRect();
+        const clickRatio = (e.clientX - rect.left) / rect.width;
+        const maxScrollLeft = container.scrollWidth - container.clientWidth;
+        container.scrollTo({ left: clickRatio * maxScrollLeft, behavior: 'smooth' });
+      });
+    }
 
     // --- Arrow Click Scrolling ---
     leftBtn.addEventListener('click', () => {
@@ -412,18 +479,64 @@ function initSliders() {
       container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     });
 
-    // --- Mouse Drag-to-Scroll ---
+    // --- Mouse Drag-to-Scroll with Momentum ---
     let isDown = false;
     let startX;
     let scrollLeft;
     let isDragging = false;
+    let velocity = 0;
+    let lastX = 0;
+    let lastTime = 0;
+    let momentumId = null;
+
+    function startMomentum() {
+      if (Math.abs(velocity) < 0.5) {
+        velocity = 0;
+        return;
+      }
+      container.scrollLeft -= velocity;
+      velocity *= 0.92; // friction — lower = stops faster
+      momentumId = requestAnimationFrame(startMomentum);
+    }
+
+    function stopMomentum() {
+      if (momentumId) {
+        cancelAnimationFrame(momentumId);
+        momentumId = null;
+      }
+    }
+
+    // Suppress context menu only after a right-click drag
+    let rightClickDragged = false;
+    container.addEventListener('contextmenu', (e) => {
+      if (rightClickDragged) {
+        e.preventDefault();
+        rightClickDragged = false;
+      }
+    });
 
     container.addEventListener('mousedown', (e) => {
+      const isRightClick = e.button === 2;
+      const isLeftClick = e.button === 0;
+
+      if (!isLeftClick && !isRightClick) return;
+
+      // Left-click: don't drag on interactive elements
+      if (isLeftClick && e.target.closest('.product-overlay-btn, .product-overlay, a, button')) return;
+
+      // Right-click: prevent default to avoid text selection issues
+      if (isRightClick) e.preventDefault();
+
+      stopMomentum();
       isDown = true;
       isDragging = false;
+      rightClickDragged = false;
+      velocity = 0;
       container.classList.add('active-drag');
       startX = e.pageX - container.offsetLeft;
       scrollLeft = container.scrollLeft;
+      lastX = e.pageX;
+      lastTime = Date.now();
       
       // Temporarily disable smooth scroll & snap for instant drag
       container.style.scrollSnapType = 'none';
@@ -436,14 +549,23 @@ function initSliders() {
       container.classList.remove('active-drag');
       container.style.scrollSnapType = '';
       container.style.scrollBehavior = '';
+      // Start momentum on leave too
+      if (isDragging && Math.abs(velocity) > 1) {
+        startMomentum();
+      }
       updateArrows();
     });
 
     container.addEventListener('mouseup', () => {
+      if (!isDown) return;
       isDown = false;
       container.classList.remove('active-drag');
       container.style.scrollSnapType = '';
       container.style.scrollBehavior = '';
+      // Start momentum scroll
+      if (isDragging && Math.abs(velocity) > 1) {
+        startMomentum();
+      }
       updateArrows();
     });
 
@@ -452,10 +574,21 @@ function initSliders() {
       e.preventDefault();
       
       const x = e.pageX - container.offsetLeft;
-      // Only count as dragging if moved more than 5px
-      if (Math.abs(x - startX) > 5) {
+      // Only count as dragging if moved more than 8px (increased for trackpad)
+      if (Math.abs(x - startX) > 8) {
         isDragging = true;
+        rightClickDragged = true;
       }
+
+      // Track velocity for momentum
+      const now = Date.now();
+      const dt = now - lastTime;
+      if (dt > 0) {
+        velocity = (e.pageX - lastX) * (16 / Math.max(dt, 8)); // normalize to ~60fps
+      }
+      lastX = e.pageX;
+      lastTime = now;
+
       const walk = (x - startX) * 1.5; // Scroll speed multiplier
       container.scrollLeft = scrollLeft - walk;
     });
@@ -465,6 +598,7 @@ function initSliders() {
       if (isDragging) {
         e.preventDefault();
         e.stopPropagation();
+        isDragging = false; // Reset so the next clean click works
       }
     }, { capture: true });
   });
