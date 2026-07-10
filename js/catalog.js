@@ -13,11 +13,11 @@ let cachedImgColIndex = 6;
 /* ─── IMAGE UTILITIES ─── */
 function optimizeImageURL(imageUrl, productId) {
   if (!imageUrl || typeof imageUrl !== 'string') return '';
+  if (!isSafeImageUrl(imageUrl)) return '';
   // Cloudinary auto-format: serve best format (WebP/AVIF) & quality
   if (imageUrl.includes('cloudinary.com') && !imageUrl.includes('f_auto')) {
     imageUrl = imageUrl.replace('/upload/', '/upload/f_auto,q_auto/');
   }
-  if (imageUrl.startsWith('data:') || imageUrl.startsWith('http')) return imageUrl;
   return imageUrl;
 }
 
@@ -109,13 +109,18 @@ function getCategoryName(cat) {
 /* ─── BUILD A SINGLE PRODUCT CARD HTML ─── */
 function buildProductCard(product) {
   const t = i18n[currentLang] || i18n.en;
-  const viewBtnText = t.product_overlay_btn || 'View Details';
-  const addCartText = t.cart_add || 'Add to Cart';
-  const safeData = JSON.stringify(product).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+  const viewBtnText = escapeHtml(t.product_overlay_btn || 'View Details');
+  const addCartText = escapeHtml(t.cart_add || 'Add to Cart');
+  const safeData = encodeURIComponent(JSON.stringify(product));
+  const safeId = escapeHtml(sanitizeProductId(product.id));
+  const safeName = escapeHtml(product.name);
+  const safeCategory = escapeHtml(product.category || '');
+  const safePrice = escapeHtml(product.price);
+  const safePh = escapeHtml(product.ph || 'ph-2');
 
   const imgHTML = product.image
-    ? `<img src="${product.image}" alt="${product.name}" class="product-img-dynamic" loading="lazy" data-product-id="${product.id}">`
-    : `<div class="img-ph ${product.ph || 'ph-2'}">${product.name}</div>`;
+    ? `<img src="${escapeHtml(product.image)}" alt="${safeName}" class="product-img-dynamic" loading="lazy" data-product-id="${safeId}">`
+    : `<div class="img-ph ${safePh}">${safeName}</div>`;
 
   return `
     <div class="product-card" data-sheet-product="${safeData}">
@@ -134,9 +139,9 @@ function buildProductCard(product) {
         </div>
       </div>
       <div class="product-info">
-        <p class="product-cat">${product.category || ''}</p>
-        <h3 class="product-name">${product.name}</h3>
-        <p class="product-price">${product.price} THB</p>
+        <p class="product-cat">${safeCategory}</p>
+        <h3 class="product-name">${safeName}</h3>
+        <p class="product-price">${safePrice} THB</p>
       </div>
     </div>
   `;
@@ -321,7 +326,7 @@ function initProductCards() {
       const card = addCartBtn.closest('.product-card');
       if (card && card.dataset.sheetProduct) {
         try {
-          const product = JSON.parse(card.dataset.sheetProduct);
+          const product = JSON.parse(decodeURIComponent(card.dataset.sheetProduct));
           addToCart(product);
         } catch (err) {
           console.error('[CARD] Failed to parse product for cart', err);
@@ -337,7 +342,7 @@ function initProductCards() {
     const card = btn.closest('.product-card');
     if (card && card.dataset.sheetProduct) {
       try {
-        const product = JSON.parse(card.dataset.sheetProduct);
+        const product = JSON.parse(decodeURIComponent(card.dataset.sheetProduct));
         openProductModal(product);
       } catch (err) {
         console.error('[CARD] Failed to parse product data', err);

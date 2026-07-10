@@ -1,43 +1,43 @@
 /* ============================================================
    Web3Forms Order Form Handler
    Sweet Gypsy Design — drop-in snippet
-   ============================================================
-
-   HOW TO USE:
-   1. Include this file via <script src="js/web3forms.js"></script>
-      after other JS files in your HTML.
-   2. Ensure your <form> has id="contactForm" (or change line 22).
-   3. Ensure your HTML has:
-      - <div id="form-status-msg" class="form-status-msg"></div>
-      - <div id="form-success-panel" class="form-success-panel">…</div>
-      - <button id="btn-send-another">…</button>
    ============================================================ */
 
 document.addEventListener('DOMContentLoaded', function () {
-
-  // ─────────────────────────────────────────────────────
-  // ⬇️ CHANGE THIS: Replace 'contactForm' with your
-  //    HTML form's id attribute if different.
-  // ─────────────────────────────────────────────────────
   var form = document.getElementById('contactForm');
 
-  // Grab UI elements
   var statusMsg = document.getElementById('form-status-msg');
   var successPanel = document.getElementById('form-success-panel');
   var submitBtn = document.getElementById('btn-submit');
   var sendAnother = document.getElementById('btn-send-another');
 
-  // Safety check — exit silently if the form doesn't exist on the page
   if (!form) {
-    console.warn('[Web3Forms] No form found. Skipping handler setup.');
     return;
   }
 
-  // ── Helper: Show inline status message ──
+  var MAX_MSGS = 3;
+  var TIME_FRAME = 24 * 60 * 60 * 1000;
+  var RATE_LIMIT_KEY = 'contactFormHistory';
+
+  function checkRateLimit() {
+    var history = JSON.parse(localStorage.getItem(RATE_LIMIT_KEY) || '[]');
+    var now = Date.now();
+    var recent = history.filter(function (time) { return now - time < TIME_FRAME; });
+    return recent.length < MAX_MSGS;
+  }
+
+  function recordSubmission() {
+    var history = JSON.parse(localStorage.getItem(RATE_LIMIT_KEY) || '[]');
+    var now = Date.now();
+    var recent = history.filter(function (time) { return now - time < TIME_FRAME; });
+    recent.push(now);
+    localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(recent));
+  }
+
   function showStatus(type, message) {
     if (!statusMsg) return;
     statusMsg.textContent = message;
-    statusMsg.className = 'form-status-msg visible ' + type; // 'success' or 'error'
+    statusMsg.className = 'form-status-msg visible ' + type;
   }
 
   function hideStatus() {
@@ -46,7 +46,6 @@ document.addEventListener('DOMContentLoaded', function () {
     statusMsg.textContent = '';
   }
 
-  // ── Helper: Toggle between form and success panel ──
   function showSuccessPanel() {
     form.style.display = 'none';
     if (successPanel) {
@@ -62,27 +61,36 @@ document.addEventListener('DOMContentLoaded', function () {
     hideStatus();
   }
 
-  // ── "Send Another Message" button ──
   if (sendAnother) {
     sendAnother.addEventListener('click', function () {
       showForm();
     });
   }
 
-  // ── Form submit handler ──
   form.addEventListener('submit', function (e) {
-    // Step 1: Prevent page reload (critical for GitHub Pages)
     e.preventDefault();
 
-    // Step 2: Check hCaptcha (skip gracefully if widget didn't load)
-    var hCaptchaInput = this.querySelector('[name="h-captcha-response"]');
-    if (hCaptchaInput && !hCaptchaInput.value) {
-      // Captcha widget IS on the page but user hasn't completed it
-      showStatus('error', 'Please complete the captcha verification before submitting.');
+    var botcheck = this.querySelector('[name="botcheck"]');
+    if (botcheck && botcheck.value) {
+      showSuccessPanel();
       return;
     }
 
-    // Step 3: Disable submit button to prevent double-clicks
+    var captchaRequired = !!this.querySelector('.h-captcha[data-captcha]');
+    var hCaptchaInput = this.querySelector('[name="h-captcha-response"]');
+
+    if (captchaRequired) {
+      if (!hCaptchaInput || !hCaptchaInput.value) {
+        showStatus('error', 'Please complete the captcha verification before submitting.');
+        return;
+      }
+    }
+
+    if (!checkRateLimit()) {
+      showStatus('error', 'You have reached the daily limit for sending messages. Please try again tomorrow.');
+      return;
+    }
+
     if (submitBtn) {
       submitBtn.disabled = true;
       submitBtn.dataset.originalText = submitBtn.innerHTML;
@@ -90,12 +98,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     hideStatus();
 
-    // Step 4: Build JSON payload (Web3Forms recommended format)
     var payload = {
-      access_key: '5a80bf1a-b8c4-4432-a36a-a2ea9b21797f'
+      access_key: SITE_CONFIG.web3formsAccessKey
     };
 
-    // Collect all form fields
     var formData = new FormData(this);
     formData.forEach(function (value, key) {
       if (key !== 'botcheck' || value) {
@@ -103,14 +109,10 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    // Include hCaptcha token if available
     if (hCaptchaInput && hCaptchaInput.value) {
       payload['h-captcha-response'] = hCaptchaInput.value;
     }
 
-    console.log('[Web3Forms] Submitting payload…', Object.keys(payload));
-
-    // Step 5: Send to Web3Forms as JSON
     fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       headers: {
@@ -123,37 +125,29 @@ document.addEventListener('DOMContentLoaded', function () {
         return response.json();
       })
       .then(function (data) {
-        console.log('[Web3Forms] Response:', data);
         if (data.success) {
-          // ── Success: show the success panel ──
           form.reset();
           if (typeof hcaptcha !== 'undefined') {
             hcaptcha.reset();
           }
+          recordSubmission();
           showSuccessPanel();
         } else {
-          // Server responded but indicated failure — show actual API message
-          console.error('[Web3Forms] Submission failed:', data);
           var apiMsg = data.message || 'Unknown error';
-          showStatus('error',
-            'Web3Forms: ' + apiMsg
-          );
+          showStatus('error', 'Web3Forms: ' + apiMsg);
         }
       })
-      .catch(function (error) {
-        console.error('[Web3Forms] Network error:', error);
+      .catch(function () {
         showStatus('error',
           'A network error occurred. ' +
           'Please check your internet connection and try again.'
         );
       })
       .finally(function () {
-        // Re-enable submit button
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.innerHTML = submitBtn.dataset.originalText || 'Send';
         }
       });
   });
-
 });

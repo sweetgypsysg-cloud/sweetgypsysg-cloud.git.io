@@ -11,7 +11,8 @@ const CART_STORAGE_KEY = 'sweetgypsy_cart';
 function loadCart() {
   try {
     const stored = localStorage.getItem(CART_STORAGE_KEY);
-    cart = stored ? JSON.parse(stored) : [];
+    const parsed = stored ? JSON.parse(stored) : [];
+    cart = Array.isArray(parsed) ? parsed.filter(item => item && typeof item.id === 'string') : [];
   } catch (e) {
     console.warn('[CART] Failed to load cart from localStorage', e);
     cart = [];
@@ -38,27 +39,36 @@ function parsePrice(priceStr) {
 
 /* ─── ADD TO CART ─── */
 function addToCart(product) {
-  const existing = cart.find(item => item.id === product.id);
+  const safeProduct = {
+    id: String(product.id || ''),
+    name: String(product.name || ''),
+    price: product.price,
+    image: isSafeImageUrl(product.image) ? product.image : '',
+    category: String(product.category || ''),
+    catId: String(product.catId || ''),
+    dmType: String(product.dmType || 'whatsapp')
+  };
+  const existing = cart.find(item => item.id === safeProduct.id);
   if (existing) {
     existing.qty += 1;
   } else {
     cart.push({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      numericPrice: parsePrice(product.price),
-      image: product.image || '',
-      category: product.category || '',
-      catId: product.catId || '',
-      dmType: product.dmType || 'whatsapp',
+      id: safeProduct.id,
+      name: safeProduct.name,
+      price: safeProduct.price,
+      numericPrice: parsePrice(safeProduct.price),
+      image: safeProduct.image,
+      category: safeProduct.category,
+      catId: safeProduct.catId,
+      dmType: safeProduct.dmType,
       qty: 1
     });
   }
   saveCart();
   updateCartBadge();
   renderCartItems();
-  showAddedFeedback(product.id);
-  console.log(`[CART] Added: ${product.name} (${getCartItemCount()} items total)`);
+  showAddedFeedback(safeProduct.id);
+  console.log(`[CART] Added: ${safeProduct.name} (${getCartItemCount()} items total)`);
 }
 
 /* ─── REMOVE FROM CART ─── */
@@ -191,26 +201,34 @@ function renderCartItems() {
 
   let html = '';
   cart.forEach(item => {
-    const imgHTML = item.image
-      ? `<img src="${item.image}" alt="${item.name}" class="cart-item-img">`
+    const safeId = escapeHtml(item.id);
+    const safeName = escapeHtml(item.name);
+    const safeCategory = escapeHtml(item.category);
+    const safePrice = escapeHtml(item.price);
+    const safeQty = Math.max(1, Math.floor(Number(item.qty) || 1));
+    const safeImage = isSafeImageUrl(item.image) ? escapeHtml(item.image) : '';
+    const removeTitle = escapeHtml(t.cart_remove || 'Remove');
+
+    const imgHTML = safeImage
+      ? `<img src="${safeImage}" alt="${safeName}" class="cart-item-img">`
       : `<div class="cart-item-img-placeholder">✦</div>`;
 
     html += `
-      <div class="cart-item" data-cart-id="${item.id}">
+      <div class="cart-item" data-cart-id="${safeId}" data-cart-qty="${safeQty}">
         <div class="cart-item-image">
           ${imgHTML}
         </div>
         <div class="cart-item-details">
-          <p class="cart-item-category">${item.category}</p>
-          <h4 class="cart-item-name">${item.name}</h4>
-          <p class="cart-item-price">${item.price} THB</p>
+          <p class="cart-item-category">${safeCategory}</p>
+          <h4 class="cart-item-name">${safeName}</h4>
+          <p class="cart-item-price">${safePrice} THB</p>
           <div class="cart-item-qty-controls">
-            <button class="cart-qty-btn cart-qty-minus" onclick="updateCartQuantity('${item.id}', ${item.qty - 1})">−</button>
-            <span class="cart-qty-value">${item.qty}</span>
-            <button class="cart-qty-btn cart-qty-plus" onclick="updateCartQuantity('${item.id}', ${item.qty + 1})">+</button>
+            <button type="button" class="cart-qty-btn cart-qty-minus" aria-label="Decrease quantity">−</button>
+            <span class="cart-qty-value">${safeQty}</span>
+            <button type="button" class="cart-qty-btn cart-qty-plus" aria-label="Increase quantity">+</button>
           </div>
         </div>
-        <button class="cart-item-remove" onclick="removeFromCart('${item.id}')" title="${t.cart_remove || 'Remove'}">
+        <button type="button" class="cart-item-remove" title="${removeTitle}" aria-label="${removeTitle}">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 6L6 18M6 6l12 12"/>
           </svg>
@@ -269,10 +287,41 @@ function checkoutLine() {
   window.open('https://line.me/ti/p/~@sweetgypsy', '_blank');
 }
 
+/* ─── CART ITEM ACTIONS (event delegation) ─── */
+let _cartActionsDelegated = false;
+function initCartActions() {
+  if (_cartActionsDelegated) return;
+  _cartActionsDelegated = true;
+
+  const container = document.getElementById('cart-items-list');
+  if (!container) return;
+
+  container.addEventListener('click', (e) => {
+    const itemEl = e.target.closest('.cart-item');
+    if (!itemEl) return;
+
+    const productId = itemEl.dataset.cartId;
+    const qty = parseInt(itemEl.dataset.cartQty, 10) || 1;
+
+    if (e.target.closest('.cart-qty-minus')) {
+      updateCartQuantity(productId, qty - 1);
+      return;
+    }
+    if (e.target.closest('.cart-qty-plus')) {
+      updateCartQuantity(productId, qty + 1);
+      return;
+    }
+    if (e.target.closest('.cart-item-remove')) {
+      removeFromCart(productId);
+    }
+  });
+}
+
 /* ─── INIT CART ─── */
 function initCart() {
   loadCart();
   updateCartBadge();
+  initCartActions();
 
   // Cart nav button
   const cartBtn = document.getElementById('cart-nav-btn');

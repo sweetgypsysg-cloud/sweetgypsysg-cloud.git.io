@@ -7,7 +7,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   initNavScroll();
   initProductCards();
-  // initContactForm(); // ← Disabled: now handled by web3forms.js
   initHamburger();
   initModal();
   initCollectionTabs();
