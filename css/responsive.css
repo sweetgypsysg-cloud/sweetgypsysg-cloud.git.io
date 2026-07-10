@@ -88,6 +88,10 @@
     margin-right: 2.5rem;
   }
 
+  .cart-nav-btn {
+    margin-right: 2rem;
+  }
+
   /* DROPDOWN MENU — floating top right card */
   .nav-links {
     display: flex;
@@ -231,6 +235,10 @@
 
   .lang-switcher {
     margin-right: 2rem;
+  }
+
+  .cart-nav-btn {
+    margin-right: 1.5rem;
   }
 
   /* DROPDOWN MENU on phone */
@@ -521,6 +529,85 @@
   }
 
   .modal-order-btn {
+    font-size: .72rem;
+    padding: .75rem 1rem;
+  }
+
+  /* CART */
+  .cart-nav-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .cart-nav-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .cart-badge {
+    min-width: 16px;
+    height: 16px;
+    font-size: .55rem;
+    top: 1px;
+    right: -1px;
+  }
+
+  .cart-drawer {
+    max-width: 100vw;
+    width: 100vw;
+  }
+
+  .cart-drawer-header {
+    padding: 1.2rem 1.2rem;
+  }
+
+  .cart-drawer-title {
+    font-size: 1.2rem;
+  }
+
+  .cart-item {
+    padding: 1rem 1.2rem;
+    gap: .75rem;
+  }
+
+  .cart-item-image {
+    width: 60px;
+    height: 60px;
+  }
+
+  .cart-item-name {
+    font-size: .9rem;
+  }
+
+  .cart-item-price {
+    font-size: .8rem;
+  }
+
+  .cart-drawer-footer {
+    padding: 1.2rem 1.2rem;
+  }
+
+  .cart-total-amount {
+    font-size: 1.3rem;
+  }
+
+  .cart-checkout-btn {
+    font-size: .7rem;
+    padding: .75rem 1rem;
+  }
+
+  .cart-toast {
+    bottom: 1.5rem;
+    font-size: .75rem;
+    padding: .6rem 1.4rem;
+  }
+
+  .product-add-cart-btn {
+    font-size: .6rem;
+    padding: .45rem .7rem;
+  }
+
+  .modal-add-cart-btn {
     font-size: .72rem;
     padding: .75rem 1rem;
   }

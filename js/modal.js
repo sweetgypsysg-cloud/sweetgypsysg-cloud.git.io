@@ -5,11 +5,13 @@
 
 let currentModalSlide = 0;
 let modalImages = [];
+let currentModalProduct = null;
 
 function openProductModal(product) {
   const overlay = document.getElementById('product-modal-overlay');
   if (!overlay) return;
 
+  currentModalProduct = product;
   const t = i18n[currentLang] || i18n.en;
 
   // Populate modal
@@ -79,6 +81,14 @@ function openProductModal(product) {
     lineBtn.href = DM_LINKS.line(product);
   }
 
+  // ── Add to Cart button in modal ──
+  const modalCartBtn = document.getElementById('modal-add-cart');
+  if (modalCartBtn) {
+    modalCartBtn.classList.remove('added');
+    const cartBtnText = modalCartBtn.querySelector('span');
+    if (cartBtnText) cartBtnText.textContent = t.cart_add || 'Add to Cart';
+  }
+
   // Show modal
   overlay.classList.add('active');
   document.body.style.overflow = 'hidden';
@@ -144,4 +154,22 @@ function initModal() {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeProductModal();
   });
+
+  // Add to Cart button in modal
+  const modalCartBtn = document.getElementById('modal-add-cart');
+  if (modalCartBtn) {
+    modalCartBtn.addEventListener('click', () => {
+      if (currentModalProduct) {
+        addToCart(currentModalProduct);
+        const t = i18n[currentLang] || i18n.en;
+        modalCartBtn.classList.add('added');
+        const btnText = modalCartBtn.querySelector('span');
+        if (btnText) btnText.textContent = t.cart_added || '✓ Added!';
+        setTimeout(() => {
+          modalCartBtn.classList.remove('added');
+          if (btnText) btnText.textContent = t.cart_add || 'Add to Cart';
+        }, 1500);
+      }
+    });
+  }
 }

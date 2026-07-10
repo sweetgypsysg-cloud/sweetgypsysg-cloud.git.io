@@ -110,6 +110,7 @@ function getCategoryName(cat) {
 function buildProductCard(product) {
   const t = i18n[currentLang] || i18n.en;
   const viewBtnText = t.product_overlay_btn || 'View Details';
+  const addCartText = t.cart_add || 'Add to Cart';
   const safeData = JSON.stringify(product).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
 
   const imgHTML = product.image
@@ -122,6 +123,14 @@ function buildProductCard(product) {
         ${imgHTML}
         <div class="product-overlay">
           <button class="product-overlay-btn">${viewBtnText}</button>
+          <button class="product-add-cart-btn" data-add-cart>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 01-8 0"/>
+            </svg>
+            ${addCartText}
+          </button>
         </div>
       </div>
       <div class="product-info">
@@ -305,6 +314,23 @@ function initProductCards() {
 
   // Use event delegation on <body> so dynamically created cards are handled
   document.body.addEventListener('click', (e) => {
+    // ── ADD TO CART button ──
+    const addCartBtn = e.target.closest('[data-add-cart]');
+    if (addCartBtn) {
+      e.stopPropagation();
+      const card = addCartBtn.closest('.product-card');
+      if (card && card.dataset.sheetProduct) {
+        try {
+          const product = JSON.parse(card.dataset.sheetProduct);
+          addToCart(product);
+        } catch (err) {
+          console.error('[CARD] Failed to parse product for cart', err);
+        }
+      }
+      return;
+    }
+
+    // ── VIEW DETAILS button ──
     const btn = e.target.closest('.product-overlay-btn');
     if (!btn) return;
 

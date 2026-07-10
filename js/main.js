@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initHamburger();
   initModal();
   initCollectionTabs();
+  initCart();
   applyLang('en'); // default language
 
   // Fetch real product data from Google Sheets
