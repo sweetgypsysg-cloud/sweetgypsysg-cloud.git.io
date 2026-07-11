@@ -119,3 +119,77 @@ section {
 .ph-5 {
   background: linear-gradient(135deg, #EAD8C4 0%, #D0AD80 100%);
 }
+
+/* ─── UTILITY CLASSES (replacing inline styles for CSP compliance) ─── */
+.h-full {
+  height: 100%;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.hero-vertical-text {
+  writing-mode: vertical-rl;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  font-size: .7rem;
+  opacity: .4;
+}
+
+.flex-row-wrap {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+.tab-img-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.story-img-wrap-1 {
+  aspect-ratio: 3/4;
+  margin-top: 2.5rem;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.story-img-wrap-2 {
+  aspect-ratio: 3/4;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.spacer-md {
+  height: 1.5rem;
+}
+
+.mb-1 {
+  margin-bottom: 1rem;
+}
+
+.wa-btn-style {
+  background: #25D366;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, .3);
+}
+
+.social-line {
+  color: #06C755;
+  border-color: #06C755;
+}
+
+.social-wa {
+  color: #25D366;
+  border-color: #25D366;
+}
+
+/* Catalog error message (replaces inline style on error <p>) */
+.catalog-error-msg {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2rem 0;
+}

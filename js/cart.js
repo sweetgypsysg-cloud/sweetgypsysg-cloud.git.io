@@ -191,13 +191,13 @@ function renderCartItems() {
 
   if (cart.length === 0) {
     container.innerHTML = '';
-    if (emptyState) emptyState.style.display = 'flex';
-    if (footerEl) footerEl.style.display = 'none';
+    if (emptyState) emptyState.hidden = false;
+    if (footerEl) footerEl.hidden = true;
     return;
   }
 
-  if (emptyState) emptyState.style.display = 'none';
-  if (footerEl) footerEl.style.display = 'block';
+  if (emptyState) emptyState.hidden = true;
+  if (footerEl) footerEl.hidden = false;
 
   let html = '';
   cart.forEach(item => {

@@ -13,7 +13,7 @@ function applyLang(lang) {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (t[key] !== undefined) {
-      el.innerHTML = t[key];
+      el.innerHTML = DOMPurify.sanitize(t[key]);
     }
   });
 
@@ -59,7 +59,12 @@ function applyLang(lang) {
   }
 }
 
-/* ─── PUBLIC: called by onclick in HTML ─── */
+/* ─── PUBLIC: called programmatically or via event listener ─── */
 function setLang(lang) {
   applyLang(lang);
 }
+
+/* ─── BIND LANGUAGE BUTTONS VIA addEventListener ─── */
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => setLang(btn.dataset.lang));
+});

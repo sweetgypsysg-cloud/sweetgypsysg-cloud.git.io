@@ -191,7 +191,7 @@ function buildCategoryColumn(cat, products) {
   } else {
     cardsHTML = `<div class="collection-empty">${t.collection_empty || 'Coming soon…'}</div>`;
   }
-  
+
   let viewAllHTML = '';
   if (products.length > 4) {
     viewAllHTML = `
@@ -264,7 +264,10 @@ function renderCatalog() {
     columnsHTML += buildCategoryColumn(cat, grouped[cat.id]);
   });
 
-  container.innerHTML = columnsHTML;
+  container.innerHTML = DOMPurify.sanitize(columnsHTML, {
+    ADD_TAGS: ['img'],
+    ADD_ATTR: ['data-product-id', 'data-name', 'data-price', 'data-img', 'data-story', 'data-desc', 'data-cat', 'data-images', 'loading', 'data-i18n']
+  });
   // Set default view to "all" mode
   container.classList.add('view-all');
 
@@ -306,7 +309,7 @@ async function fetchCatalog() {
   } catch (error) {
     console.error('[CATALOG] Error fetching:', error);
     if (container) {
-      container.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:2rem 0;">${t.catalog_error || 'Unable to load products.'}</p>`;
+      container.innerHTML = DOMPurify.sanitize(`<p class="catalog-error-msg">${t.catalog_error || 'Unable to load products.'}</p>`);
     }
   }
 }
@@ -373,15 +376,25 @@ function initCollectionTabs() {
       // Update active column visibility
       const columnsContainer = document.getElementById('collections-columns');
       const columns = document.querySelectorAll('.collection-column');
-      
+
       if (catId === 'all') {
         columnsContainer.classList.add('view-all');
-        columns.forEach(col => col.classList.remove('active'));
+        columns.forEach(col => {
+          col.classList.remove('active');
+          // Force fadeIn animation to replay
+          col.style.animation = 'none';
+          col.offsetHeight; /* trigger reflow */
+          col.style.animation = '';
+        });
       } else {
         columnsContainer.classList.remove('view-all');
         columns.forEach(col => {
           if (col.getAttribute('data-category') === catId) {
             col.classList.add('active');
+            // Force fadeIn animation to replay
+            col.style.animation = 'none';
+            col.offsetHeight; /* trigger reflow */
+            col.style.animation = '';
           } else {
             col.classList.remove('active');
           }
@@ -424,7 +437,7 @@ function initSliders() {
         leftBtn.style.opacity = '1';
         leftBtn.style.pointerEvents = 'auto';
       }
-      
+
       if (maxScrollLeft <= 0 || container.scrollLeft >= maxScrollLeft - 5) {
         rightBtn.style.opacity = '0';
         rightBtn.style.pointerEvents = 'none';
@@ -568,10 +581,10 @@ function initSliders() {
       scrollLeft = container.scrollLeft;
       lastX = e.pageX;
       lastTime = Date.now();
-      
+
       // Temporarily disable smooth scroll & snap for instant drag
       container.style.scrollSnapType = 'none';
-      container.style.scrollBehavior = 'auto'; 
+      container.style.scrollBehavior = 'auto';
     });
 
     container.addEventListener('mouseleave', () => {
@@ -603,7 +616,7 @@ function initSliders() {
     container.addEventListener('mousemove', (e) => {
       if (!isDown) return;
       e.preventDefault();
-      
+
       const x = e.pageX - container.offsetLeft;
       // Only count as dragging if moved more than 8px (increased for trackpad)
       if (Math.abs(x - startX) > 8) {

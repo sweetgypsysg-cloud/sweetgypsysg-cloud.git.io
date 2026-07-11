@@ -4,17 +4,16 @@
 <head>
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-DQGT15MH0F"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-DQGT15MH0F');
-  </script>
+  <script src="js/analytics.js"></script>
+
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://web3forms.com https://js.hcaptcha.com https://*.hcaptcha.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://res.cloudinary.com https://lh3.googleusercontent.com https://drive.google.com; connect-src 'self' https://api.web3forms.com https://docs.google.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com; frame-src https://hcaptcha.com https://*.hcaptcha.com;">
+    content="default-src 'self'; script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://web3forms.com https://js.hcaptcha.com https://*.hcaptcha.com https://cdnjs.cloudflare.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://res.cloudinary.com https://lh3.googleusercontent.com https://drive.google.com; connect-src 'self' https://api.web3forms.com https://docs.google.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com; frame-src https://hcaptcha.com https://*.hcaptcha.com; frame-ancestors 'none';">
+
+
+
   <meta name="referrer" content="strict-origin-when-cross-origin">
 
   <!-- ═══════════════════════════════════════════════════════════
@@ -75,7 +74,11 @@
   <!-- Web3Forms client script — handles hCaptcha automatically, no site key needed -->
   <script src="https://web3forms.com/client/script.js" async defer></script>
 
+  <!-- DOMPurify — sanitize dynamic HTML to prevent XSS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.6/purify.min.js"></script>
+
 </head>
+
 
 <body>
 
@@ -96,16 +99,17 @@
     </ul>
     <div class="nav-right">
       <div class="lang-switcher" id="lang-switcher">
-        <button class="lang-btn" data-lang="th" onclick="setLang('th')">ไทย</button>
-        <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
-        <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button>
-        <button class="lang-btn" data-lang="ja" onclick="setLang('ja')">日本語</button>
+        <button class="lang-btn" data-lang="th">ไทย</button>
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="zh">中文</button>
+        <button class="lang-btn" data-lang="ja">日本語</button>
       </div>
       <button class="cart-nav-btn" id="cart-nav-btn" aria-label="Shopping Cart">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-          <line x1="3" y1="6" x2="21" y2="6"/>
-          <path d="M16 10a4 4 0 01-8 0"/>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <path d="M16 10a4 4 0 01-8 0" />
         </svg>
         <span class="cart-badge" id="cart-badge">0</span>
       </button>
@@ -148,9 +152,8 @@
       </div>
     </div>
     <div class="hero-right">
-      <div class="img-ph ph-1" style="height:100%">
-        <span
-          style="writing-mode:vertical-rl;letter-spacing:.2em;text-transform:uppercase;font-size:.7rem;opacity:.4">รูปหลักของแบรนด์</span>
+      <div class="img-ph ph-1 h-full">
+        <span class="hero-vertical-text">รูปหลักของแบรนด์</span>
       </div>
       <div class="hero-badge">
         <strong data-i18n="hero_badge_title">Wear your story</strong>
@@ -188,8 +191,8 @@
        ═══════════════════════════════════════════════════════════ -->
   <div class="line-cta">
     <p class="line-cta-text" data-i18n="contact_line_cta">สั่งง่าย ตอบไว ผ่าน <strong>Line OA</strong> หรือ <strong
-        style="color:#25D366">WhatsApp</strong></p>
-    <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+        class="social-wa">WhatsApp</strong></p>
+    <div class="flex-row-wrap">
       <a href="https://line.me/ti/p/~@sweetgypsy" class="line-btn">
         <svg class="line-icon" viewBox="0 0 24 24">
           <path
@@ -197,8 +200,7 @@
         </svg>
         <span data-i18n="line_btn_text">Line OA</span>
       </a>
-      <a href="https://wa.me/66645195663" class="line-btn"
-        style="background:#25D366;box-shadow:0 4px 14px rgba(37,211,102,.3)" target="_blank" rel="noopener noreferrer">
+      <a href="https://wa.me/66645195663" class="line-btn wa-btn-style" target="_blank" rel="noopener noreferrer">
         <svg class="line-icon" viewBox="0 0 24 24">
           <path
             d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
@@ -225,8 +227,8 @@
 
     <!-- COLLECTION TABS -->
     <div class="collection-tabs-ui" id="collection-tabs-ui">
-      <button class="collection-tab active" data-tab="all">
-        <div class="tab-img" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem">✦</div>
+      <button class="collection-tab" data-tab="all">
+        <div class="tab-img tab-img-icon">✦</div>
         <span data-i18n="tab_all">All</span>
       </button>
       <button class="collection-tab" data-tab="rings">
@@ -292,7 +294,7 @@
        ═══════════════════════════════════════════════════════════ -->
   <section class="reviews" id="reviews">
     <p class="section-tag" data-i18n="rev_tag">รีวิวจากลูกค้า</p>
-    <h2 class="section-title" style="text-align:center" data-i18n="rev_title">เสียงจาก<em>หัวใจ</em>ที่สวมใส่</h2>
+    <h2 class="section-title text-center" data-i18n="rev_title">เสียงจาก<em>หัวใจ</em>ที่สวมใส่</h2>
     <div class="review-grid">
       <div class="review-card">
         <div class="review-stars">★★★★★</div>
@@ -323,17 +325,17 @@
        ═══════════════════════════════════════════════════════════ -->
   <section class="story" id="story">
     <div class="story-imgs">
-      <div style="aspect-ratio:3/4;margin-top:2.5rem;border-radius:3px;overflow:hidden">
-        <div class="img-ph ph-5" style="height:100%">รูปศิลปิน</div>
+      <div class="story-img-wrap-1">
+        <div class="img-ph ph-5 h-full">รูปศิลปิน</div>
       </div>
-      <div style="aspect-ratio:3/4;border-radius:3px;overflow:hidden">
-        <div class="img-ph ph-1" style="height:100%">รูปงาน</div>
+      <div class="story-img-wrap-2">
+        <div class="img-ph ph-1 h-full">รูปงาน</div>
       </div>
     </div>
     <div class="story-content">
       <p class="section-tag" data-i18n="story_tag">My Story</p>
       <h2 class="section-title" data-i18n="story_title">จากปลาย<em>พู่กัน</em><br>สู่เครื่องประดับ</h2>
-      <div style="height:1.5rem"></div>
+      <div class="spacer-md"></div>
       <p data-i18n="story_p1">Sweet Gypsy ก่อตั้งโดยอดีตนักเรียนศิลปะผู้หลงใหลในการสร้างสรรค์
         และเชื่อว่าความฝันไม่จำเป็นต้องสมบูรณ์แบบ</p>
       <p data-i18n="story_p2">จากจุดเริ่มต้นที่ไร้หลักแหล่ง สู่ร้านเล็กๆ ที่เป็นที่พักพิงของใจ ที่ Kad Klang Wiang
@@ -384,7 +386,7 @@
         <!-- Web3Forms configuration -->
         <input type="hidden" name="subject" value="🛍️ New Order — Sweet Gypsy Design">
         <input type="hidden" name="from_name" value="Sweet Gypsy Website">
-        <input type="text" name="botcheck" style="display:none"> <!-- Honeypot to catch bots -->
+        <input type="text" name="botcheck" hidden> <!-- Honeypot to catch bots -->
 
         <div class="form-row">
           <div class="form-group">
@@ -422,7 +424,7 @@
         <div id="form-status-msg" class="form-status-msg"></div>
 
         <!-- Web3Forms auto-managed hCaptcha — no site key required -->
-        <div class="h-captcha" data-captcha="true" style="margin-bottom:1rem"></div>
+        <div class="h-captcha mb-1" data-captcha="true"></div>
 
         <button type="submit" class="btn-submit" id="btn-submit" data-i18n="contact_send">ส่งข้อความ →</button>
       </form>
@@ -464,10 +466,9 @@
         <div class="social-links">
           <a href="https://www.facebook.com/sweetgypsyth" class="social-link">Facebook</a>
           <a href="https://www.instagram.com/sweetgypsys" class="social-link">Instagram</a>
-          <a href="https://line.me/ti/p/~@sweetgypsy" class="social-link"
-            style="color:#06C755;border-color:#06C755">Line OA</a>
-          <a href="https://wa.me/66645195663" class="social-link" style="color:#25D366;border-color:#25D366"
-            target="_blank" rel="noopener noreferrer">WhatsApp</a>
+          <a href="https://line.me/ti/p/~@sweetgypsy" class="social-link social-line">Line OA</a>
+          <a href="https://wa.me/66645195663" class="social-link social-wa" target="_blank"
+            rel="noopener noreferrer">WhatsApp</a>
         </div>
       </div>
     </div>
@@ -485,7 +486,8 @@
        FLOATING BUTTONS: LINE + WHATSAPP
        ═══════════════════════════════════════════════════════════ -->
   <div class="float-group">
-    <a href="https://wa.me/66645195663" class="float-btn float-wa-btn" target="_blank" rel="noopener noreferrer" title="WhatsApp">
+    <a href="https://wa.me/66645195663" class="float-btn float-wa-btn" target="_blank" rel="noopener noreferrer"
+      title="WhatsApp">
       <span class="float-tooltip">WhatsApp</span>
       <svg viewBox="0 0 24 24">
         <path
@@ -537,10 +539,11 @@
           <!-- Contact / Order Buttons -->
           <div class="modal-actions">
             <button class="modal-add-cart-btn" id="modal-add-cart">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-                <line x1="3" y1="6" x2="21" y2="6"/>
-                <path d="M16 10a4 4 0 01-8 0"/>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 01-8 0" />
               </svg>
               <span data-i18n="cart_add">เพิ่มลงตะกร้า</span>
             </button>
@@ -553,7 +556,8 @@
               </svg>
               <span data-i18n="modal_wa_btn">Order via WhatsApp</span>
             </a>
-            <a href="#" id="modal-line-btn" class="modal-order-btn modal-line" target="_blank" rel="noopener noreferrer">
+            <a href="#" id="modal-line-btn" class="modal-order-btn modal-line" target="_blank"
+              rel="noopener noreferrer">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
                 <path
                   d="M12 2C6.48 2 2 6.02 2 11c0 4.14 2.73 7.67 6.57 9.13.49.18.58.44.43.87l-.38 1.44c-.12.44.16.44.34.32C12.28 21 20 15.88 20 11c0-4.98-3.58-9-8-9z" />
@@ -575,10 +579,11 @@
       <!-- Header -->
       <div class="cart-drawer-header">
         <div class="cart-drawer-title">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <path d="M16 10a4 4 0 01-8 0"/>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 01-8 0" />
           </svg>
           <span data-i18n="cart_title">ตะกร้าสินค้า</span>
         </div>
@@ -596,7 +601,7 @@
       </div>
 
       <!-- Footer: Total + Checkout -->
-      <div class="cart-drawer-footer" id="cart-drawer-footer" style="display:none">
+      <div class="cart-drawer-footer" id="cart-drawer-footer" hidden>
         <div class="cart-total-row">
           <span class="cart-total-label" data-i18n="cart_total">ยอดรวม</span>
           <span class="cart-total-amount" id="cart-total-amount">฿ 0</span>
@@ -605,14 +610,17 @@
         <div class="cart-checkout-btns">
           <button class="cart-checkout-btn cart-checkout-wa" id="cart-checkout-wa">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-              <path d="M11.999 2C6.477 2 2 6.477 2 12c0 1.89.524 3.66 1.438 5.168L2 22l4.985-1.418A9.945 9.945 0 0011.999 22C17.522 22 22 17.523 22 12S17.522 2 11.999 2zm0 18a7.946 7.946 0 01-4.291-1.253l-.308-.183-3.185.906.85-3.093-.2-.317A7.961 7.961 0 014 12c0-4.418 3.581-8 7.999-8C16.418 4 20 7.582 20 12s-3.582 8-8.001 8z"/>
+              <path
+                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+              <path
+                d="M11.999 2C6.477 2 2 6.477 2 12c0 1.89.524 3.66 1.438 5.168L2 22l4.985-1.418A9.945 9.945 0 0011.999 22C17.522 22 22 17.523 22 12S17.522 2 11.999 2zm0 18a7.946 7.946 0 01-4.291-1.253l-.308-.183-3.185.906.85-3.093-.2-.317A7.961 7.961 0 014 12c0-4.418 3.581-8 7.999-8C16.418 4 20 7.582 20 12s-3.582 8-8.001 8z" />
             </svg>
             <span data-i18n="cart_checkout_wa">สั่งซื้อผ่าน WhatsApp</span>
           </button>
           <button class="cart-checkout-btn cart-checkout-line" id="cart-checkout-line">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
-              <path d="M12 2C6.48 2 2 6.02 2 11c0 4.14 2.73 7.67 6.57 9.13.49.18.58.44.43.87l-.38 1.44c-.12.44.16.44.34.32C12.28 21 20 15.88 20 11c0-4.98-3.58-9-8-9z"/>
+              <path
+                d="M12 2C6.48 2 2 6.02 2 11c0 4.14 2.73 7.67 6.57 9.13.49.18.58.44.43.87l-.38 1.44c-.12.44.16.44.34.32C12.28 21 20 15.88 20 11c0-4.98-3.58-9-8-9z" />
             </svg>
             <span data-i18n="cart_checkout_line">สั่งซื้อผ่าน Line OA</span>
           </button>
