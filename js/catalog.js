@@ -14,6 +14,15 @@ let cachedImgColIndex = 6;
 function optimizeImageURL(imageUrl, productId) {
   if (!imageUrl || typeof imageUrl !== 'string') return '';
   if (!isSafeImageUrl(imageUrl)) return '';
+
+  // Convert Google Drive view links to direct image links
+  if (imageUrl.includes('drive.google.com')) {
+    const match = imageUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || imageUrl.match(/id=([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+      imageUrl = `https://drive.google.com/uc?id=${match[1]}&export=download`;
+    }
+  }
+
   // Cloudinary auto-format: serve best format (WebP/AVIF) & quality
   if (imageUrl.includes('cloudinary.com') && !imageUrl.includes('f_auto')) {
     imageUrl = imageUrl.replace('/upload/', '/upload/f_auto,q_auto/');
@@ -68,12 +77,23 @@ const CATEGORIES = [
     id: 'bracelets',
     names: { en: 'Bracelets', th: 'กำไล', zh: '手镯', ja: 'ブレスレット' },
     ph: 'ph-5'
+  },
+  {
+    id: 'craft_toys',
+    keywords: ['craft toys', 'ของเล่นคราฟต์'],
+    names: { en: 'Craft toys', th: 'ของเล่นคราฟต์', zh: '手工艺玩具', ja: 'クラフトトイ' },
+    ph: 'ph-1'
   }
 ];
 
 /* ─── DM LINK GENERATORS — based on DM_Type column (Col G) ─── */
 const DM_LINKS = {
-  line: (product) => `https://line.me/ti/p/~@sweetgypsy`,
+  line: (product) => {
+    const msg = currentLang === 'th'
+      ? `สวัสดีค่ะ สนใจสินค้า: ${product.name} (รหัส: ${product.id})`
+      : `Hello, I'm interested in: ${product.name} (ID: ${product.id})`;
+    return `https://line.me/R/oaMessage/@185ijvvm/?${encodeURIComponent(msg)}`;
+  },
   whatsapp: (product) => {
     const msg = currentLang === 'th'
       ? `สวัสดีค่ะ สนใจสินค้า: ${product.name} (รหัส: ${product.id})`
@@ -96,8 +116,12 @@ function normalizeCatalogType(raw) {
   if (!raw) return null;
   // Strip zero-width spaces and trim
   const cleaned = raw.replace(/[\u200B-\u200D\uFEFF]/g, '').trim().toLowerCase();
-  // Match against known category IDs
-  const match = CATEGORIES.find(cat => cat.id === cleaned);
+  // Match against known category IDs or keywords
+  const match = CATEGORIES.find(cat =>
+    cat.id === cleaned ||
+    cat.id.replace('_', ' ') === cleaned ||
+    (cat.keywords && cat.keywords.includes(cleaned))
+  );
   return match ? match.id : null;
 }
 

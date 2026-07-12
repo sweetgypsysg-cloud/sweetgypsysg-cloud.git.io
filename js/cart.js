@@ -283,8 +283,10 @@ function checkoutWhatsApp() {
 
 function checkoutLine() {
   if (cart.length === 0) return;
-  // Line OA doesn't support pre-filled messages via URL, just open the chat
-  window.open('https://line.me/ti/p/~@sweetgypsy', '_blank');
+  const msg = generateOrderMessage();
+  // Line OA message pre-fill URL format
+  const url = `https://line.me/R/oaMessage/@185ijvvm/?${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
 }
 
 /* ─── CART ITEM ACTIONS (event delegation) ─── */
