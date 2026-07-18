@@ -1,0 +1,106 @@
+/* ============================================================
+   Sweet Gypsy Design — Image Zoom (Click-to-Zoom & Pan)
+   Simple zoom-in/out with drag-to-pan inside the image frame
+   ============================================================ */
+
+/* ─── Magnifying Glass Button + Tooltip wrapper ─── */
+.magnifier-btn-group {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+/* ─── Tooltip Text Box ─── */
+.magnifier-tooltip {
+  background: rgba(250, 246, 240, 0.92);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-family: var(--body-font, 'Jost', sans-serif);
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: #8b7355;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  letter-spacing: 0.02em;
+}
+
+/* Hide tooltip when zoom is active */
+.magnifier-btn-group.active .magnifier-tooltip {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ─── Magnifying Glass Toggle Button ─── */
+.magnifier-toggle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(212, 175, 55, 0.5);
+  background: rgba(250, 246, 240, 0.88);
+  backdrop-filter: blur(6px);
+  color: #8b7355;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+}
+
+.magnifier-toggle-btn:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: #d4af37;
+  color: #d4af37;
+  transform: scale(1.08);
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.25);
+}
+
+/* Active state — when zoom is ON */
+.magnifier-toggle-btn.active {
+  background: #d4af37;
+  border-color: #d4af37;
+  color: white;
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+}
+
+.magnifier-toggle-btn.active:hover {
+  background: #c9a030;
+  transform: scale(1.08);
+}
+
+.magnifier-toggle-btn svg {
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+/* ─── Zoom container overrides ─── */
+.modal-img-wrapper.zoom-active {
+  cursor: grab;
+  overflow: hidden;
+}
+
+.modal-img-wrapper.zoom-active:active {
+  cursor: grabbing;
+}
+
+/* Zoomed image — no transition lag during drag */
+.modal-img-wrapper.zoom-active .modal-product-img {
+  transition: none;
+  will-change: transform;
+}
+
+/* Smooth zoom transition when scrolling */
+.modal-img-wrapper.zoom-active .modal-product-img.zoom-transitioning {
+  transition: transform 0.15s ease-out;
+}

@@ -27,7 +27,10 @@ function openProductModal(product) {
   const leftBtn = document.getElementById('modal-arrow-left');
   const rightBtn = document.getElementById('modal-arrow-right');
   
+  // Preserve the magnifier button group before clearing
+  const magnifierGroup = document.getElementById('magnifier-btn-group');
   imgWrapper.innerHTML = '';
+  if (magnifierGroup) imgWrapper.appendChild(magnifierGroup);
   dotsContainer.innerHTML = '';
   currentModalSlide = 0;
   
@@ -92,6 +95,11 @@ function openProductModal(product) {
   // Show modal
   overlay.classList.add('active');
   document.body.style.overflow = 'hidden';
+
+  // Activate magnifier on the first image after DOM render
+  if (typeof activateModalMagnifier === 'function') {
+    activateModalMagnifier();
+  }
 }
 
 function closeProductModal() {
@@ -125,6 +133,11 @@ function updateModalSlider() {
   dots.forEach((dot, idx) => {
     dot.classList.toggle('active', idx === currentModalSlide);
   });
+
+  // Reinit magnifier for the new slide image
+  if (typeof activateModalMagnifier === 'function') {
+    activateModalMagnifier();
+  }
 }
 
 function initModal() {

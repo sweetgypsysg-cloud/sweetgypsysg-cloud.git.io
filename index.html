@@ -68,6 +68,7 @@
   <link rel="stylesheet" href="css/sections.css">
   <link rel="stylesheet" href="css/contact.css">
   <link rel="stylesheet" href="css/modal.css?v=2">
+  <link rel="stylesheet" href="css/magnifier.css?v=4">
   <link rel="stylesheet" href="css/cart.css?v=1">
   <link rel="stylesheet" href="css/responsive.css?v=4">
 
@@ -525,6 +526,16 @@
             <div class="modal-img-wrapper" id="modal-img-wrapper">
               <!-- Images will be injected here dynamically -->
               <img id="modal-img" class="modal-product-img" src="" alt="">
+              <!-- Magnifying Glass Toggle + Tooltip -->
+              <div class="magnifier-btn-group" id="magnifier-btn-group">
+                <span class="magnifier-tooltip" data-i18n="magnifier_tooltip">click to see more detail</span>
+                <button class="magnifier-toggle-btn" id="magnifier-toggle-btn" aria-label="Toggle zoom">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                </button>
+              </div>
             </div>
             <button class="modal-arrow modal-arrow-right" id="modal-arrow-right" aria-label="Next image">❯</button>
             <div class="modal-dots" id="modal-dots"></div>
@@ -643,7 +654,8 @@
   <script src="js/nav.js"></script>
   <script src="js/catalog.js?v=7"></script>
   <script src="js/lang.js"></script>
-  <script src="js/modal.js?v=2"></script>
+  <script src="js/modal.js?v=3"></script>
+  <script src="js/magnifier.js?v=3"></script>
   <script src="js/cart.js?v=2"></script>
   <script src="js/main.js"></script>
   <script src="js/web3forms.js"></script>
