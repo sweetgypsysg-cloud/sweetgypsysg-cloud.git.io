@@ -1,0 +1,445 @@
+/* ============================================================
+   Sweet Gypsy Design — About Me Overlay Page
+   Full-screen overlay with 3 alternating image+text sections
+   ============================================================ */
+
+/* ─── OVERLAY ─── */
+.aboutme-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: var(--cream);
+  overflow-y: auto;
+  overflow-x: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .5s cubic-bezier(.4, 0, .2, 1),
+    visibility .5s;
+}
+
+.aboutme-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ─── CLOSE BUTTON ─── */
+.aboutme-close {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.8rem;
+  z-index: 2010;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(201, 169, 110, .3);
+  border-radius: 50%;
+  background: rgba(250, 246, 240, .92);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: var(--brown);
+  transition: background .3s, transform .3s, border-color .3s;
+  opacity: 0;
+  transform: scale(.8);
+}
+
+.aboutme-overlay.active .aboutme-close {
+  opacity: 1;
+  transform: scale(1);
+  transition-delay: .35s;
+}
+
+.aboutme-close:hover {
+  background: var(--gold);
+  color: var(--white);
+  border-color: var(--gold);
+  transform: scale(1.08);
+}
+
+/* ─── HERO / HEADER ─── */
+.aboutme-hero {
+  text-align: center;
+  padding: 8rem 3rem 5rem;
+  background: linear-gradient(180deg, var(--cream-dark) 0%, var(--cream) 100%);
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.aboutme-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('https://res.cloudinary.com/dbc2ma9xe/image/upload/v1784448869/images_6_gyp1au.jpg');
+  background-size: 80%; /* Adjust size of watermark */
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.08; /* Faded watermark background */
+  z-index: 0;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.aboutme-hero-tag,
+.aboutme-hero-title,
+.aboutme-hero-sub,
+.aboutme-scroll-hint {
+  position: relative;
+  z-index: 1;
+}
+
+.aboutme-overlay.active .aboutme-hero {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity .7s .15s, transform .7s .15s cubic-bezier(.4, 0, .2, 1);
+}
+
+.aboutme-hero::before {
+  content: '✦';
+  position: absolute;
+  top: 5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: .9rem;
+  color: var(--gold);
+  letter-spacing: 1em;
+  opacity: .5;
+}
+
+.aboutme-hero-tag {
+  font-size: .68rem;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+}
+
+.aboutme-hero-title {
+  font-family: var(--heading-font), serif;
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-weight: 300;
+  color: var(--brown);
+  line-height: 1.3;
+  margin-bottom: 1.5rem;
+}
+
+.aboutme-hero-title em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.aboutme-hero-sub {
+  font-size: 1rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ─── DECORATIVE DIVIDER ─── */
+.aboutme-divider {
+  width: 60px;
+  height: 1px;
+  background: var(--gold);
+  margin: 0 auto;
+  opacity: .5;
+}
+
+/* ─── SECTIONS (image + text) ─── */
+.aboutme-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  min-height: 70vh;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity .7s, transform .7s cubic-bezier(.4, 0, .2, 1);
+}
+
+.aboutme-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Alternate layout: even sections flip image to right */
+.aboutme-section:nth-child(even) .aboutme-section-img {
+  order: 2;
+}
+
+.aboutme-section:nth-child(even) .aboutme-section-text {
+  order: 1;
+}
+
+/* ─── IMAGE SIDE ─── */
+.aboutme-section-img {
+  position: relative;
+  overflow: hidden;
+}
+
+.aboutme-section-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: sepia(5%) saturate(1.05);
+  transition: transform .6s cubic-bezier(.4, 0, .2, 1);
+}
+
+.aboutme-section:hover .aboutme-section-img img {
+  transform: scale(1.03);
+}
+
+.aboutme-section-img .aboutme-img-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(61, 43, 31, .15) 100%);
+  pointer-events: none;
+}
+
+/* ─── TEXT SIDE ─── */
+.aboutme-section-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5rem 6rem;
+  background: var(--white);
+}
+
+.aboutme-section:nth-child(even) .aboutme-section-text {
+  background: var(--cream);
+}
+
+.aboutme-section:nth-child(3) .aboutme-section-text {
+  background: var(--cream-dark);
+}
+
+.aboutme-section-tag {
+  font-size: .65rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+
+.aboutme-section-num {
+  font-family: var(--heading-font), serif;
+  font-size: 5rem;
+  font-weight: 600;
+  color: rgba(201, 169, 110, .12);
+  line-height: 1;
+  margin-bottom: .5rem;
+}
+
+.aboutme-section-title {
+  font-family: var(--heading-font), serif;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 300;
+  color: var(--brown);
+  line-height: 1.3;
+  margin-bottom: 2rem;
+}
+
+.aboutme-section-title em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.aboutme-section-body p {
+  font-size: .92rem;
+  color: var(--text-muted);
+  line-height: 2;
+  margin-bottom: 1.2rem;
+}
+
+.aboutme-section-body p:last-child {
+  margin-bottom: 0;
+}
+
+.aboutme-section-quote {
+  border-left: 2px solid var(--gold);
+  padding-left: 1.5rem;
+  margin: 2rem 0;
+  font-family: var(--heading-font), serif;
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--brown);
+  line-height: 1.7;
+}
+
+/* ─── BOTTOM CTA ─── */
+.aboutme-bottom {
+  text-align: center;
+  padding: 5rem 3rem;
+  background: var(--brown);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity .7s, transform .7s;
+}
+
+.aboutme-bottom.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.aboutme-bottom-text {
+  font-family: var(--heading-font), serif;
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  color: var(--cream);
+  font-style: italic;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+}
+
+.aboutme-bottom .btn-primary {
+  background: var(--gold);
+  color: var(--brown);
+}
+
+.aboutme-bottom .btn-primary:hover {
+  background: var(--cream);
+}
+
+/* ─── SCROLL INDICATOR ─── */
+.aboutme-scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  opacity: .5;
+  animation: aboutme-bounce 2s infinite;
+}
+
+.aboutme-scroll-hint span {
+  font-size: .6rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.aboutme-scroll-hint svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--gold);
+}
+
+@keyframes aboutme-bounce {
+
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(6px);
+  }
+}
+
+/* ─── RESPONSIVE — Tablet (≤ 1024px) ─── */
+@media (max-width: 1024px) {
+  .aboutme-section-text {
+    padding: 4rem 3.5rem;
+  }
+}
+
+/* ─── RESPONSIVE — Tablet Portrait (≤ 900px) ─── */
+@media (max-width: 900px) {
+  .aboutme-hero {
+    padding: 7rem 2rem 4rem;
+  }
+
+  .aboutme-section-text {
+    padding: 3rem 2.5rem;
+  }
+
+  .aboutme-section-num {
+    font-size: 4rem;
+  }
+}
+
+/* ─── RESPONSIVE — Mobile (≤ 768px) ─── */
+@media (max-width: 768px) {
+  .aboutme-close {
+    top: 1rem;
+    right: 1rem;
+    width: 42px;
+    height: 42px;
+    font-size: 1.2rem;
+  }
+
+  .aboutme-hero {
+    padding: 6rem 1.5rem 3.5rem;
+  }
+
+  .aboutme-section {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  /* Reset order on mobile — always image on top */
+  .aboutme-section:nth-child(even) .aboutme-section-img {
+    order: 0;
+  }
+
+  .aboutme-section:nth-child(even) .aboutme-section-text {
+    order: 0;
+  }
+
+  .aboutme-section-img {
+    aspect-ratio: 4/3;
+  }
+
+  .aboutme-section-text {
+    padding: 2.5rem 1.5rem;
+  }
+
+  .aboutme-section-num {
+    font-size: 3.5rem;
+  }
+
+  .aboutme-bottom {
+    padding: 4rem 1.5rem;
+  }
+}
+
+/* ─── RESPONSIVE — Small Mobile (≤ 480px) ─── */
+@media (max-width: 480px) {
+  .aboutme-hero {
+    padding: 5rem 1rem 3rem;
+  }
+
+  .aboutme-hero-sub {
+    font-size: .88rem;
+  }
+
+  .aboutme-section-text {
+    padding: 2rem 1rem;
+  }
+
+  .aboutme-section-title {
+    font-size: 1.3rem;
+  }
+
+  .aboutme-section-body p {
+    font-size: .85rem;
+  }
+
+  .aboutme-section-quote {
+    font-size: 1rem;
+  }
+
+  .aboutme-bottom {
+    padding: 3rem 1rem;
+  }
+
+  .aboutme-bottom-text {
+    font-size: 1.1rem;
+  }
+}

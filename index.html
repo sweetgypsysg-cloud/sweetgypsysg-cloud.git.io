@@ -69,6 +69,7 @@
   <link rel="stylesheet" href="css/modal.css?v=2">
   <link rel="stylesheet" href="css/magnifier.css?v=4">
   <link rel="stylesheet" href="css/cart.css?v=1">
+  <link rel="stylesheet" href="css/aboutme.css?v=1">
   <link rel="stylesheet" href="css/responsive.css?v=4">
 
   <!-- Web3Forms client script — handles hCaptcha automatically, no site key needed -->
@@ -86,7 +87,11 @@
        NAV
        ═══════════════════════════════════════════════════════════ -->
   <nav>
-    <a href="#" class="nav-logo">Sweet <span>Gypsy</span></a>
+    <a href="#" class="nav-logo">
+      <img src="https://res.cloudinary.com/dbc2ma9xe/image/upload/v1784449863/Screenshot_2026-07-19_152847_w123e3.png"
+        alt="Sweet Gypsy Logo" class="nav-logo-img">
+      Sweet <span>Gypsy</span>
+    </a>
     <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu" aria-expanded="false"
       aria-controls="nav-menu">
       <span></span><span></span><span></span>
@@ -346,7 +351,7 @@
         เชียงใหม่</p>
       <div class="story-quote" data-i18n="story_quote">เราเชื่อในความงามของความไม่สมบูรณ์
         และในพลังของเรื่องราวที่ถูกสวมใส่</div>
-      <a href="#contact" class="btn-primary" data-i18n="story_cta">พูดคุยกับเรา</a>
+      <a href="#" class="btn-primary" id="about-me-trigger" data-i18n="story_cta">เกี่ยวกับเรา</a>
     </div>
   </section>
 
@@ -646,6 +651,141 @@
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════
+       ABOUT ME OVERLAY PAGE
+       Hidden full-screen page triggered by Story CTA button
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="aboutme-overlay" id="aboutme-overlay">
+    <button class="aboutme-close" id="aboutme-close" aria-label="Close">✕</button>
+
+    <!-- Hero Header -->
+    <div class="aboutme-hero">
+      <p class="aboutme-hero-tag" data-i18n="aboutme_tag">About Me</p>
+      <h2 class="aboutme-hero-title" data-i18n="aboutme_title">เพราะทุกชิ้นงาน<br><em>คือเสี้ยวหนึ่งของหัวใจ…</em></h2>
+      <p class="aboutme-hero-sub" data-i18n="aboutme_sub">จากปลายพู่กันของนักเรียนศิลปะที่เคยเร่ขายความหวัง
+        สู่มือที่รังสรรค์เครื่องประดับแต่ละชิ้น ด้วยหัวใจที่ผ่านเรื่องราว</p>
+      <div class="aboutme-scroll-hint">
+        <span>Scroll</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+    </div>
+
+    <div class="aboutme-divider"></div>
+
+    <!-- Section 1: จุดเริ่มต้น -->
+    <div class="aboutme-section">
+      <div class="aboutme-section-img">
+        <img src="img/aboutme-artist.png" alt="Sweet Gypsy — ศิลปินผู้สร้างสรรค์">
+        <div class="aboutme-img-overlay"></div>
+      </div>
+      <div class="aboutme-section-text">
+        <div class="aboutme-section-num">01</div>
+        <p class="aboutme-section-tag" data-i18n="aboutme_s1_tag">The Beginning</p>
+        <h3 class="aboutme-section-title" data-i18n="aboutme_s1_title">ยินดีต้อนรับสู่โลกของ <em>Sweet Gypsy</em></h3>
+        <div class="aboutme-section-body">
+          <p data-i18n="aboutme_s1_p1">ร้านเครื่องประดับทำมือ ที่เกิดจากความฝันเล็กๆ ของศิลปินผู้เดินทาง ทั้งในโลกจริงและในจิตใจ ที่นี่… ทุกชิ้นงานถูกสร้างขึ้นจากมือ และเต็มไปด้วยหัวใจ</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: ศิลปินนักเดินทาง -->
+    <div class="aboutme-section">
+      <div class="aboutme-section-img">
+        <img src="img/aboutme-journey.png" alt="Sweet Gypsy — เครื่องประดับทำมือ">
+        <div class="aboutme-img-overlay"></div>
+      </div>
+      <div class="aboutme-section-text">
+        <div class="aboutme-section-num">02</div>
+        <p class="aboutme-section-tag" data-i18n="aboutme_s2_tag">The Artist</p>
+        <h3 class="aboutme-section-title" data-i18n="aboutme_s2_title">ฉันคือ<em>ศิลปินนักเดินทาง</em></h3>
+        <div class="aboutme-section-body">
+          <p data-i18n="aboutme_s2_p1">อดีตนักเรียนศิลปะที่เคยขายภาพวาดด้วยหัวใจ
+            แต่กลับพบทางของตัวเองผ่านเครื่องประดับที่ผสมศิลป์ วินเทจ และเรื่องเล่าแห่งชีวิตจริง จากผู้ไร้หลักแหล่ง
+            สู่เจ้าของร้านที่อบอุ่นที่สุดในจักรวาลเล็กๆ ของตัวเอง</p>
+          <p data-i18n="aboutme_s2_p2">คนที่มีรอยยิ้มละมุนจนได้ชื่อว่า "Sweet" และหัวใจเสรีที่โลดแล่นในทุกชิ้นงานแบบ
+            "Gypsy" ฉันหลงใหลในศิลปะอย่างลึกซึ้งชอบความงามแบบเรเนซองส์แม้ในยุคหุ่นยนต์สำรวจดาวอังคาร</p>
+          <p data-i18n="aboutme_s2_p3">ฉันรักแมว รักความเป็นตัวของตัวเอง ฉันมีไฟที่ไม่เคยดับ
+            แม้ผ่านคืนวันที่ยากลำบากมาไม่น้อย ฉันคือคนที่ไม่ยอมแพ้ และยังคงทำให้โลกนี้น่ารักขึ้นทุกวัน…ทีละชิ้น ทีละยิ้ม
+            ทีละเรื่องเล่า</p>
+          <div class="aboutme-section-quote" data-i18n="aboutme_s2_quote">
+            ความฝันของฉันคือการสร้างสรรค์สิ่งที่มีคุณค่าทางใจ สร้างแรงบันดาลใจ
+            และทำให้ผู้สวมใส่รู้สึกถึงพลังบวกที่สามารถเผชิญหน้ากับโลกภายนอกได้อย่างมั่นใจ</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: ร้าน Sweet Gypsy -->
+    <div class="aboutme-section">
+      <div class="aboutme-section-img">
+        <img src="img/aboutme-shop.png" alt="Sweet Gypsy — ร้านเครื่องประดับ เชียงใหม่">
+        <div class="aboutme-img-overlay"></div>
+      </div>
+      <div class="aboutme-section-text">
+        <div class="aboutme-section-num">03</div>
+        <p class="aboutme-section-tag" data-i18n="aboutme_s3_tag">The Sanctuary</p>
+        <h3 class="aboutme-section-title" data-i18n="aboutme_s3_title"><em>ที่หลบฝน</em>ของคนฝัน</h3>
+        <div class="aboutme-section-body">
+          <p data-i18n="aboutme_s3_p1">ทันทีที่ผลักบานประตูไม้เก่าเบาๆ กลิ่นหอมจางๆ
+            ของลาเวนเดอร์และกลิ่นไม้สนจะต้อนรับคุณอย่างอบอุ่น เพลงบรรเลงแผ่วๆ จากยุคโบฮีเมียนยุค 60 ลอยแว่วเข้ามา
+            ข้างในร้านเต็มไปด้วยแสงแดดนุ่มๆ ที่ลอดผ่านม่านลูกไม้สีครีม เสมือนเวลาในร้านหยุดหมุนอยู่แค่ตรงนั้น</p>
+          <p data-i18n="aboutme_s3_p2">เคาน์เตอร์ไม้หน้าร้านมีชุดเครื่องประดับวางเรียงอย่างประณีต —
+            สร้อยคอรูปดวงจันทร์แกะจากเปลือกหอย แหวนทองเหลืองที่ฝังหินแอมเมทิสต์สีม่วงหม่น
+            ต่างหูที่ดัดจากเส้นลวดโบราณผสมลูกปัดแก้วใส — แต่ละชิ้นถูกตั้งชื่อไว้ เช่น "ดอกไม้ที่รอดในพายุ"
+            "เสียงกระซิบจากแสงดาว" หรือ "สัญญาณของเสรีภาพ"</p>
+          <p data-i18n="aboutme_s3_p3">ลูกค้าที่มาเยี่ยมร้านส่วนใหญ่ไม่ได้ตั้งใจซื้อของ แต่กลับบอกว่า
+            "ขอมาเติมพลังใจหน่อยค่ะ" หลายคนกลับไปพร้อมเครื่องประดับเล็กๆ ที่สวมใส่แล้วรู้สึก "กล้าขึ้น"
+            ไม่ใช่เพราะราคาหรือแบรนด์ แต่มันคือความรู้สึกว่า "ฉันมีบางอย่างที่บอกตัวเองว่า…ฉันยังสวยงาม"</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: เรื่องราวของร้าน Sweet Gypsy -->
+    <div class="aboutme-section">
+      <div class="aboutme-section-img">
+        <img src="img/aboutme-story.png" alt="Sweet Gypsy — เรื่องราวของร้าน">
+        <div class="aboutme-img-overlay"></div>
+      </div>
+      <div class="aboutme-section-text">
+        <div class="aboutme-section-num">04</div>
+        <p class="aboutme-section-tag" data-i18n="aboutme_s4_tag">Our Story</p>
+        <h3 class="aboutme-section-title" data-i18n="aboutme_s4_title"> เรื่องราวของร้าน <em>“Sweet Gypsy”</em></h3>
+        <div class="aboutme-section-body">
+          <div class="aboutme-section-quote" data-i18n="aboutme_s4_quote">เพราะทุกชิ้นงานคือเสี้ยวหนึ่งของหัวใจ…</div>
+          <p data-i18n="aboutme_s4_p1">ในโลกที่วุ่นวายและเปลี่ยนแปลงเร็วเกินไป มีบางคนเลือกจะเดินช้าๆ…
+            ด้วยหัวใจที่ไม่เคยหยุดฝัน</p>
+          <p data-i18n="aboutme_s4_p2">“Sweet Gypsy” เริ่มต้นจากหญิงสาวธรรมดาคนหนึ่ง
+            ผู้เคยเป็นนักเรียนศิลปะที่หลงรักการวาดภาพ ทว่าโลกภายนอกกลับไม่อ่อนโยนพอสำหรับความฝันที่ยังไม่แข็งแรง
+            เธอเร่ขายภาพวาดด้วยความหวัง แต่สิ่งที่ได้รับกลับมีเพียงสายตาว่างเปล่าและความผิดหวังซ้ำแล้วซ้ำเล่า</p>
+          <p data-i18n="aboutme_s4_p3">แต่ชีวิตไม่เคยปิดทางสำหรับคนที่ไม่ยอมแพ้ ในวันหนึ่งที่เหมือนธรรมดา
+            เธอหยิบเศษลูกปัดเก่า สร้อยเส้นขาด และจี้เล็กๆ ที่ใครบางคนลืมไว้ มาผสมกันด้วยมือที่เคยสั่นไหวจากความล้มเหลว
+            และนั่นคือจุดเริ่มต้นของการ “สร้างใหม่”</p>
+          <p data-i18n="aboutme_s4_p4">จากศิลปินไร้บ้าน… กลายเป็นช่างเครื่องประดับ จากหญิงสาวผู้หลงทาง…
+            กลายเป็นเจ้าของแบรนด์ที่มีหัวใจในทุกชิ้นงาน</p>
+          <p data-i18n="aboutme_s4_p5">“Sweet” มาจากรอยยิ้มที่ใครๆ ต่างบอกว่าเธอมีความอบอุ่นอยู่ในนั้น “Gypsy”
+            มาจากชีวิตที่เคยไม่มีที่อยู่เป็นหลัก เธอเดินทางตามใจ ดั่งวิญญาณเสรีในโลกใบใหญ่</p>
+          <p data-i18n="aboutme_s4_p6">แต่ในที่สุด เธอได้พบ “บ้าน” ไม่ใช่หลังคา แต่คือผู้คนที่หลงรักงานของเธอ
+            ไม่ใช่กำแพง แต่คือคำขอบคุณจากลูกค้าที่สวมใส่สิ่งที่เธอสร้าง</p>
+          <p data-i18n="aboutme_s4_p7">Sweet Gypsy ไม่ได้ขายแค่เครื่องประดับ แต่มันคือเศษเสี้ยวของความทรงจำ ความกล้า
+            และความรักในศิลปะ ทุกชิ้นทำด้วยมือ และเต็มไปด้วยหัวใจ เธอไม่ใช่แค่คนทำของขาย… แต่คือ “ผู้เล่าเรื่อง”
+            ผ่านสายสร้อยและจี้รูปดาว</p>
+          <p data-i18n="aboutme_s4_p8">วันนี้ “Sweet Gypsy” อาจไม่ได้เป็นร้านที่ใหญ่โต
+            แต่ในหัวใจของใครหลายคน—มันคือแหล่งพลังงานบวกที่สวมใส่ได้ เป็นร้านเล็กๆ ที่บอกว่า…
+            ความฝันของคุณยังมีที่อยู่เสมอ</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom CTA -->
+    <div class="aboutme-bottom">
+      <p class="aboutme-bottom-text" data-i18n="aboutme_bottom_text">Sweet Gypsy
+        ไม่ได้ขายแค่เครื่องประดับ<br>แต่มันคือเศษเสี้ยวของความทรงจำ ความกล้า และความรักในศิลปะ<br>ทุกชิ้นทำด้วยมือ
+        และเต็มไปด้วยหัวใจ </p>
+      <a href="#" class="btn-primary" id="aboutme-back-btn" data-i18n="aboutme_back_btn">พูดคุยกับเรา →</a>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
        SCRIPTS (ordered by dependency)
        ═══════════════════════════════════════════════════════════ -->
   <script src="js/security.js"></script>
@@ -657,6 +797,7 @@
   <script src="js/modal.js?v=3"></script>
   <script src="js/magnifier.js?v=3"></script>
   <script src="js/cart.js?v=2"></script>
+  <script src="js/aboutme.js"></script>
   <script src="js/main.js"></script>
   <script src="js/web3forms.js"></script>
 
