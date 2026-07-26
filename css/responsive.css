@@ -763,3 +763,122 @@
     }
   }
 }
+
+/* ============================================================
+   Mobile navigation layout
+   ============================================================ */
+@media (max-width: 768px) {
+  nav {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 44px 44px;
+    grid-template-areas:
+      "brand cart menu"
+      "languages languages languages";
+    column-gap: .25rem;
+    row-gap: .45rem;
+    padding: max(.55rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) .55rem max(1rem, env(safe-area-inset-left));
+  }
+
+  .nav-logo {
+    grid-area: brand;
+    min-width: 0;
+    gap: .45rem;
+    font-size: 1.3rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nav-logo-img {
+    height: 36px;
+    flex: 0 0 auto;
+  }
+
+  /* Let the two controls participate directly in the mobile nav grid. */
+  .nav-right {
+    display: contents;
+  }
+
+  .lang-switcher {
+    grid-area: languages;
+    width: 100%;
+    margin: 0;
+    padding: 3px;
+    justify-content: space-between;
+    border-radius: 8px;
+  }
+
+  .cart-nav-btn {
+    grid-area: cart;
+    width: 44px;
+    height: 44px;
+    margin: 0;
+  }
+
+  /* The hamburger is positioned by JS at the viewport level; reserve its slot. */
+  nav::after {
+    content: '';
+    grid-area: menu;
+    width: 44px;
+    height: 44px;
+  }
+
+  .nav-hamburger {
+    top: max(.4rem, env(safe-area-inset-top));
+    right: max(.5rem, env(safe-area-inset-right));
+  }
+
+  /* A full-width menu sits below the language row, rather than over the header. */
+  .nav-links {
+    top: calc(6.25rem + env(safe-area-inset-top));
+    right: .75rem;
+    left: .75rem;
+    width: auto;
+    max-width: none;
+    padding: .75rem;
+    gap: .2rem;
+    align-items: stretch;
+    border-radius: 10px;
+    transform-origin: top center;
+  }
+
+  .nav-links a {
+    font-size: .86rem;
+    letter-spacing: .08em;
+    padding: .7rem .8rem;
+    text-align: left;
+  }
+
+  .hero {
+    padding-top: calc(7rem + env(safe-area-inset-top));
+  }
+}
+
+@media (max-width: 480px) {
+  nav {
+    column-gap: .15rem;
+    row-gap: .35rem;
+  }
+
+  .nav-logo {
+    font-size: 1.15rem;
+  }
+
+  .lang-switcher {
+    gap: 2px;
+    padding: 2px;
+  }
+
+  .nav-hamburger {
+    top: max(.25rem, env(safe-area-inset-top));
+    right: max(.25rem, env(safe-area-inset-right));
+  }
+
+  .nav-links {
+    top: calc(5.75rem + env(safe-area-inset-top));
+    right: .5rem;
+    left: .5rem;
+    padding: .6rem;
+    gap: .15rem;
+  }
+}
