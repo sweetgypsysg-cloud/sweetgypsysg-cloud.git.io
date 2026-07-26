@@ -193,3 +193,161 @@ section {
   color: var(--text-muted);
   padding: 2rem 0;
 }
+
+/* ─── THAI LANGUAGE — Typography & Layout Overrides ─── */
+/* Prompt font needs different weight/spacing treatment than Cormorant Garamond */
+
+html.lang-th .section-title {
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: .01em;
+}
+
+html.lang-th .section-title em {
+  font-style: normal;
+  font-weight: 300;
+}
+
+html.lang-th .hero-title {
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: .02em;
+}
+
+html.lang-th .hero-title em {
+  font-style: normal;
+  font-weight: 300;
+  color: var(--gold);
+}
+
+html.lang-th .hero-sub {
+  font-weight: 300;
+  line-height: 1.9;
+  font-size: .9rem;
+}
+
+html.lang-th .hero-tag {
+  font-weight: 400;
+  letter-spacing: .15em;
+}
+
+html.lang-th .hero-badge {
+  font-style: normal;
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+html.lang-th .hero-badge p {
+  font-style: normal;
+  font-weight: 300;
+  font-size: .9rem;
+}
+
+html.lang-th .stat-num {
+  font-weight: 600;
+}
+
+html.lang-th .stat-label {
+  font-weight: 400;
+  letter-spacing: .05em;
+}
+
+/* Collections */
+html.lang-th .inspi-name {
+  font-weight: 500;
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+
+html.lang-th .inspi-desc {
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+html.lang-th .inspi-num {
+  font-weight: 700;
+}
+
+/* Reviews */
+html.lang-th .review-text {
+  font-style: normal;
+  font-weight: 300;
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+/* Story */
+html.lang-th .story-content p {
+  font-weight: 300;
+  line-height: 1.9;
+}
+
+html.lang-th .story-quote {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 1.15rem;
+  line-height: 1.7;
+}
+
+/* How to Order */
+html.lang-th .step-title {
+  font-weight: 500;
+}
+
+html.lang-th .step-desc {
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+html.lang-th .step::before {
+  font-weight: 700;
+}
+
+/* Contact */
+html.lang-th .contact-form-title {
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+html.lang-th .contact-info-title {
+  font-style: normal;
+  font-weight: 400;
+}
+
+/* Line CTA */
+html.lang-th .line-cta-text {
+  font-style: normal;
+  font-weight: 300;
+  font-size: 1.5rem;
+}
+
+/* Nav */
+html.lang-th .nav-logo {
+  font-weight: 600;
+}
+
+html.lang-th .nav-links a {
+  font-weight: 400;
+  letter-spacing: .06em;
+}
+
+/* Buttons */
+html.lang-th .btn-primary {
+  font-weight: 400;
+  letter-spacing: .08em;
+}
+
+html.lang-th .btn-secondary {
+  font-weight: 400;
+}
+
+/* Marquee */
+html.lang-th .marquee-item {
+  font-weight: 300;
+  letter-spacing: .12em;
+}
+
+/* Footer */
+html.lang-th .footer-bar {
+  font-weight: 300;
+}
