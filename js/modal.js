@@ -94,6 +94,7 @@ function openProductModal(product) {
 
   // Show modal
   overlay.classList.add('active');
+  document.body.classList.add('product-modal-open');
   document.body.style.overflow = 'hidden';
 
   // Activate magnifier on the first image after DOM render
@@ -106,6 +107,7 @@ function closeProductModal() {
   const overlay = document.getElementById('product-modal-overlay');
   if (!overlay) return;
   overlay.classList.remove('active');
+  document.body.classList.remove('product-modal-open');
   document.body.style.overflow = '';
 }
 
