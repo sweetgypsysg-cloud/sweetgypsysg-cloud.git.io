@@ -5,21 +5,37 @@
 
 let currentModalSlide = 0;
 let modalImages = [];
+let currentMainProduct = null;
 let currentModalProduct = null;
 
 function openProductModal(product) {
   const overlay = document.getElementById('product-modal-overlay');
   if (!overlay) return;
 
-  currentModalProduct = product;
   const t = i18n[currentLang] || i18n.en;
 
+  // Keep a Sheet 1 product as the catalog parent while its Sheet 2 variants are viewed.
+  // A product opened directly from Sheet 2 still resolves to the same product family.
+  if (!currentMainProduct || getProductFamilyCode(currentMainProduct.id) !== getProductFamilyCode(product.id)) {
+    currentMainProduct = product;
+  }
+  const parent = currentMainProduct || product;
+  currentModalProduct = product;
+
+  // Fallback values from parent if product is missing fields (e.g. variation)
+  const category = product.category || parent.category || '';
+  const displayName = product.name || product.id || parent.name || parent.id || '';
+  const story = product.story || parent.story || '';
+  const rawPrice = (product.price && product.price !== 'N/A') ? product.price : (parent.price && parent.price !== 'N/A') ? parent.price : '';
+  const priceDisplay = rawPrice ? `${rawPrice} THB` : '';
+  const desc = product.desc || parent.desc || t.modal_desc_default || '';
+
   // Populate modal
-  document.getElementById('modal-cat').textContent = product.category || '';
-  document.getElementById('modal-name').textContent = product.name || '';
-  document.getElementById('modal-story').textContent = product.story || '';
-  document.getElementById('modal-price').textContent = product.price ? `${product.price} THB` : '';
-  document.getElementById('modal-desc').textContent = product.desc || t.modal_desc_default || '';
+  document.getElementById('modal-cat').textContent = category;
+  document.getElementById('modal-name').textContent = displayName;
+  document.getElementById('modal-story').textContent = story;
+  document.getElementById('modal-price').textContent = priceDisplay;
+  document.getElementById('modal-desc').textContent = desc;
 
   // Image Slider
   const imgWrapper = document.getElementById('modal-img-wrapper');
@@ -41,7 +57,7 @@ function openProductModal(product) {
   modalImages.forEach((imgUrl, index) => {
     const img = document.createElement('img');
     img.src = imgUrl;
-    img.alt = `${product.name} - image ${index + 1}`;
+    img.alt = `${displayName} - image ${index + 1}`;
     img.className = 'modal-product-img';
     if (index === 0) setupImageError(img, product.id);
     imgWrapper.appendChild(img);
@@ -65,16 +81,15 @@ function openProductModal(product) {
   updateModalSlider();
 
   // ── Dynamic DM link based on DM_Type column from Google Sheet ──
-  const dmLink = getDmLink(product);
-  const dmType = (product.dmType || 'whatsapp').toLowerCase().trim();
+  const dmType = (product.dmType || parent.dmType || 'whatsapp').toLowerCase().trim();
 
   // WhatsApp button — always uses WhatsApp link
   const waMsg = currentLang === 'th'
-    ? `สวัสดีค่ะ สนใจสั่งซื้อสินค้า: ${product.name} (รหัส: ${product.id})`
-    : `Hello, I'm interested in ordering: ${product.name} (ID: ${product.id})`;
+    ? `สวัสดีค่ะ สนใจสั่งซื้อสินค้า: ${displayName} (รหัส: ${product.id})`
+    : `Hello, I'm interested in ordering: ${displayName} (ID: ${product.id})`;
   document.getElementById('modal-wa-btn').href = `https://wa.me/66645195663?text=${encodeURIComponent(waMsg)}`;
 
-  // Line button — uses the DM_Type link if it's line/ig/fb, otherwise default Line
+  // Line button
   const lineBtn = document.getElementById('modal-line-btn');
   if (dmType === 'instagram') {
     lineBtn.href = DM_LINKS.instagram(product);
@@ -101,6 +116,9 @@ function openProductModal(product) {
   if (typeof activateModalMagnifier === 'function') {
     activateModalMagnifier();
   }
+
+  // ── Render Sub-Products from Sheet 2 ──
+  renderModalSubProducts(parent, product);
 }
 
 function closeProductModal() {
@@ -109,6 +127,7 @@ function closeProductModal() {
   overlay.classList.remove('active');
   document.body.classList.remove('product-modal-open');
   document.body.style.overflow = '';
+  currentMainProduct = null;
 }
 
 function goToModalSlide(index) {
@@ -187,4 +206,93 @@ function initModal() {
       }
     });
   }
+}
+
+/* ─── SUB-PRODUCTS MINI CATALOG ─── */
+
+function buildSubProductCardHTML(sub) {
+  const safeName = escapeHtml(sub.name || sub.id);
+  const safeId = escapeHtml(sub.id);
+  const priceText = (sub.price && sub.price !== 'N/A')
+    ? (sub.price.includes('฿') || sub.price.includes('THB') ? escapeHtml(sub.price) : `${escapeHtml(sub.price)} THB`)
+    : '';
+  const safeData = encodeURIComponent(JSON.stringify(sub));
+
+  const imgHTML = sub.image
+    // The thumbnails are inside a modal. Eager loading avoids browsers
+    // postponing a visible Sheet 2 image because it was inserted lazily.
+    ? `<img src="${escapeHtml(sub.image)}" alt="${safeName}" class="sub-card-img" loading="eager">`
+    : `<div class="sub-card-img-ph">${safeName.charAt(0)}</div>`;
+
+  return `
+    <div class="modal-sub-card" data-sub-product="${safeData}" title="${safeName}">
+      <div class="sub-card-img-wrap">
+        ${imgHTML}
+        <span class="sub-card-badge">${safeId}</span>
+      </div>
+      <div class="sub-card-info">
+        <p class="sub-card-name">${safeName}</p>
+        ${priceText ? `<p class="sub-card-price">${priceText}</p>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderModalSubProducts(parentProduct, activeSubProduct) {
+  const container = document.getElementById('modal-sub-products');
+  const grid = document.getElementById('modal-sub-grid');
+  if (!container || !grid) return;
+
+  // Look up sub-products from Sheet 2
+  const subProducts = (typeof getSubProducts === 'function')
+    ? getSubProducts(parentProduct.id)
+    : [];
+
+  if (subProducts.length === 0) {
+    container.style.display = 'none';
+    grid.innerHTML = '';
+    return;
+  }
+
+  // Build sub-product cards
+  let cardsHTML = subProducts.map(sub => buildSubProductCardHTML(sub)).join('');
+  grid.innerHTML = DOMPurify.sanitize(cardsHTML, {
+    ADD_TAGS: ['img'],
+    ADD_ATTR: ['data-sub-product', 'loading', 'title', 'src', 'alt']
+  });
+
+  container.style.display = '';
+
+  // Highlight active variation if any
+  if (activeSubProduct) {
+    grid.querySelectorAll('.modal-sub-card').forEach(card => {
+      try {
+        const sub = JSON.parse(decodeURIComponent(card.dataset.subProduct));
+        if (sub.id === activeSubProduct.id || sub.image === activeSubProduct.image) {
+          card.classList.add('active-sub');
+        } else {
+          card.classList.remove('active-sub');
+        }
+      } catch (e) {}
+    });
+  }
+
+  // Setup image error handlers for sub-product cards
+  grid.querySelectorAll('.sub-card-img').forEach(img => {
+    setupImageError(img, 'sub');
+  });
+
+  // Click handler: open the sub-product in the same modal
+  grid.querySelectorAll('.modal-sub-card').forEach(card => {
+    card.addEventListener('click', () => {
+      try {
+        const subProduct = JSON.parse(decodeURIComponent(card.dataset.subProduct));
+        openProductModal(subProduct);
+      } catch (err) {
+        console.error('[MODAL] Failed to open sub-product:', err);
+      }
+    });
+  });
+
+  console.log(`[MODAL] Rendered ${subProducts.length} sub-products for ${parentProduct.id}`);
 }

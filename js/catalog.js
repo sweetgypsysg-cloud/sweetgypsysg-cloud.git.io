@@ -4,11 +4,15 @@
    ============================================================ */
 
 const SHEET_ID = '1Al60xA21jSCWvyqvgQeSxVhyPeU71ADsYLzZPbLQpys';
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&headers=1`;
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&headers=1&gid=0`;
+const SHEET2_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&headers=1&gid=1039902543`;
 
 // Cached sheet data for re-rendering on language change
 let cachedSheetRows = null;
 let cachedImgColIndex = 6;
+
+// Cached Sheet 2 data (sub-products / variations)
+let cachedSheet2Products = [];
 
 /* ─── IMAGE UTILITIES ─── */
 function optimizeImageURL(imageUrl, productId) {
@@ -30,9 +34,45 @@ function optimizeImageURL(imageUrl, productId) {
   return imageUrl;
 }
 
+/**
+ * Extract direct image URLs from a Sheet cell and pass every URL through the
+ * same validation/normalisation path.  Sheet editors commonly paste either a
+ * direct URL or an =IMAGE("URL") formula; both formats are accepted here.
+ */
+function parseImageUrls(rawImage, productId) {
+  if (typeof rawImage !== 'string') return [];
+
+  // Read a whole =IMAGE() formula before splitting by commas: a formula may
+  // include optional arguments after the URL, e.g. =IMAGE("url", 1).
+  const formulaUrls = Array.from(
+    rawImage.matchAll(/=IMAGE\(\s*["']([^"']+)["']/gi),
+    match => match[1].trim()
+  );
+  const values = formulaUrls.length > 0 ? formulaUrls : rawImage.split(/[\n,]/).map(value => value.trim());
+
+  return values
+    .map(url => optimizeImageURL(url, productId))
+    .filter(Boolean);
+}
+
+/** Google Visualization responses are wrapped in a JavaScript callback. */
+function parseSheetResponse(responseText) {
+  const start = responseText.indexOf('{');
+  const end = responseText.lastIndexOf('}');
+  if (start === -1 || end === -1 || end < start) {
+    throw new Error('Google Sheets returned an unreadable response.');
+  }
+  return JSON.parse(responseText.slice(start, end + 1));
+}
+
 function setupImageError(imgElement, productId) {
+  if (!imgElement || imgElement.dataset.imageErrorReady === 'true') return;
+  imgElement.dataset.imageErrorReady = 'true';
+
   imgElement.addEventListener('error', function () {
     console.warn(`[IMG] Failed to load: ${productId}`);
+    // Avoid an error loop if even the placeholder is unavailable.
+    if (this.classList.contains('image-error')) return;
     this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5JbWFnZSBOb3QgRm91bmQ8L3RleHQ+PC9zdmc+';
     this.classList.add('image-error');
   });
@@ -130,6 +170,116 @@ function getCategoryName(cat) {
   return cat.names[currentLang] || cat.names.en;
 }
 
+/* ─── SHEET 2: SUB-PRODUCT UTILITIES ─── */
+
+/** Parse a single row from Sheet 2 into a sub-product object */
+function parseSubProductRow(row, index) {
+  // Sheet 2 column layout (6 columns):
+  //   Col0=ID, Col1=NAME, Col2=PRICE, Col3=ImageURL, Col4=Description, Col5=type of products
+  const id = row.c[0]?.v?.toString()?.trim() || `sub-${index}`;
+  const name = row.c[1]?.v?.toString()?.trim() || id;
+  const priceVal = row.c[2]?.v;
+  const price = (priceVal !== null && priceVal !== undefined && priceVal !== '') ? priceVal.toString().trim() : '';
+  const rawImage = row.c[3]?.v?.toString() || '';
+  const desc = row.c[4]?.v?.toString()?.trim() || '';
+
+  const rawCatalogType = row.c[5]?.v?.toString() || '';
+  const catId = normalizeCatalogType(rawCatalogType);
+  const catObj = CATEGORIES.find(c => c.id === catId);
+  const category = catObj ? getCategoryName(catObj) : '';
+
+  // Sheet 2 uses exactly the same safe URL parser as the primary catalog.
+  // This keeps CSP, Google Drive and Cloudinary handling consistent.
+  const images = parseImageUrls(rawImage, id);
+  const image = images.length > 0 ? images[0] : '';
+
+  return {
+    id, name, price, desc, image, images, category,
+    catId: catId || 'other',
+    ph: catObj ? catObj.ph : 'ph-2',
+    dmType: 'whatsapp',
+    story: ''
+  };
+}
+
+/**
+ * Normalize a product ID to its family code.
+ * "SGC001(1)" and "sgc001 ( 2 )" both become "SGC001".
+ */
+function getProductFamilyCode(productId) {
+  const cleanId = String(productId || '')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .trim();
+  const match = cleanId.match(/^(.*?)\s*\(\s*\d+\s*\)\s*$/);
+  const baseId = match ? match[1] : cleanId;
+  return baseId.replace(/[^a-z0-9]/gi, '').toUpperCase();
+}
+
+/** Returns true only for a numbered Sheet 2 variation such as "SGC001(1)". */
+function isNumberedVariation(productId) {
+  return /\(\s*\d+\s*\)\s*$/.test(String(productId || '').trim());
+}
+
+function getVariationNumber(productId) {
+  const match = String(productId || '').match(/\(\s*(\d+)\s*\)\s*$/);
+  return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
+}
+
+/**
+ * Find the numbered Sheet 2 variants for one Sheet 1 product.
+ * e.g. "SGC001" returns "SGC001(1)", "SGC001(2)", …
+ * and never variants belonging to SGC002 or another SGC code.
+ *
+ * Older Sheet 2 rows may use the exact parent ID ("SGC001") instead of a
+ * numbered suffix. Those rows are supported as a fallback, so their images
+ * still appear until the IDs are renamed to the numbered variation format.
+ */
+function getSubProducts(parentId) {
+  if (!cachedSheet2Products || cachedSheet2Products.length === 0 || !parentId) return [];
+
+  const parentFamily = getProductFamilyCode(parentId);
+  if (!parentFamily) return [];
+
+  const relatedProducts = cachedSheet2Products.filter(sub =>
+    sub && getProductFamilyCode(sub.id) === parentFamily
+  );
+  const numberedVariations = relatedProducts.filter(sub => isNumberedVariation(sub.id));
+
+  // Prefer SGC001(1), SGC001(2), … when they exist. Otherwise show the
+  // directly matching SGC001 Sheet 2 row(s), which is the current sheet format.
+  const productsToShow = numberedVariations.length > 0
+    ? numberedVariations
+    : relatedProducts.filter(sub => !isNumberedVariation(sub.id));
+
+  return productsToShow.sort((a, b) => getVariationNumber(a.id) - getVariationNumber(b.id));
+}
+
+/** Fetch and cache Sheet 2 data */
+async function fetchSheet2() {
+  try {
+    console.log('[CATALOG] Fetching Sheet 2 (sub-products)...');
+    const response = await fetch(SHEET2_URL);
+    if (!response.ok) throw new Error(`Sheet 2 request failed (${response.status})`);
+    const text = await response.text();
+    const jsonData = parseSheetResponse(text);
+    const rows = jsonData.table.rows;
+
+    cachedSheet2Products = [];
+    rows.forEach((row, index) => {
+      try {
+        cachedSheet2Products.push(parseSubProductRow(row, index));
+      } catch (e) {
+        console.error(`[SHEET2] Row ${index} failed:`, e);
+      }
+    });
+
+    console.log(`[CATALOG] ✓ Sheet 2 loaded: ${cachedSheet2Products.length} sub-products`);
+  } catch (error) {
+    console.warn('[CATALOG] Sheet 2 fetch failed (non-critical):', error.message);
+    cachedSheet2Products = [];
+  }
+}
+
 /* ─── BUILD A SINGLE PRODUCT CARD HTML ─── */
 function buildProductCard(product) {
   const t = i18n[currentLang] || i18n.en;
@@ -137,9 +287,10 @@ function buildProductCard(product) {
   const addCartText = escapeHtml(t.cart_add || 'Add to Cart');
   const safeData = encodeURIComponent(JSON.stringify(product));
   const safeId = escapeHtml(sanitizeProductId(product.id));
-  const safeName = escapeHtml(product.name);
+  const displayName = product.name || product.id || '';
+  const safeName = escapeHtml(displayName);
   const safeCategory = escapeHtml(product.category || '');
-  const safePrice = escapeHtml(product.price);
+  const priceText = (product.price && product.price !== 'N/A') ? `${escapeHtml(product.price)} THB` : '';
   const safePh = escapeHtml(product.ph || 'ph-2');
 
   const imgHTML = product.image
@@ -165,7 +316,7 @@ function buildProductCard(product) {
       <div class="product-info">
         <p class="product-cat">${safeCategory}</p>
         <h3 class="product-name">${safeName}</h3>
-        <p class="product-price">${safePrice} THB</p>
+        ${priceText ? `<p class="product-price">${priceText}</p>` : ''}
       </div>
     </div>
   `;
@@ -175,20 +326,21 @@ function buildProductCard(product) {
 function parseProductRow(row, index, imgColIndex) {
   // Sheet structure: Col0=ID, Col1=NAME, Col2=PRICE, Col3=ImageURL,
   //                 Col4=Description, Col5=Catalog_Type, Col6=DM_Type
-  const id = row.c[0]?.v?.toString() || `product-${index}`;
-  const name = row.c[1]?.v || '';
-  const price = row.c[2]?.v || 'N/A';
-  const rawImage = row.c[3]?.v || '';
+  const id = row.c[0]?.v?.toString()?.trim() || `product-${index}`;
+  const name = row.c[1]?.v?.toString()?.trim() || '';
+  const priceVal = row.c[2]?.v;
+  const price = (priceVal !== null && priceVal !== undefined && priceVal !== '') ? priceVal.toString().trim() : '';
+  const rawImage = row.c[3]?.v?.toString() || '';
   let images = [];
   if (typeof rawImage === 'string') {
-    images = rawImage.split(/[\n,]/).map(u => optimizeImageURL(u.trim(), id)).filter(Boolean);
+    images = parseImageUrls(rawImage, id);
   }
   const image = images.length > 0 ? images[0] : '';
-  const desc = row.c[4]?.v || '';
-  const dmType = row.c[6]?.v || 'whatsapp';
+  const desc = row.c[4]?.v?.toString()?.trim() || '';
+  const dmType = row.c[6]?.v?.toString() || 'whatsapp';
 
   // Use Catalog_Type column (Col F / index 5) from the sheet
-  const rawCatalogType = row.c[5]?.v || '';
+  const rawCatalogType = row.c[5]?.v?.toString() || '';
   const catId = normalizeCatalogType(rawCatalogType);
   const catObj = CATEGORIES.find(c => c.id === catId);
   const category = catObj ? getCategoryName(catObj) : '';
@@ -254,11 +406,13 @@ function renderCatalog() {
   const container = document.getElementById('collections-columns');
   if (!container) return;
 
-  // Parse all products from sheet rows
+  // Parse all products from sheet 1 rows
   const allProducts = [];
+
   cachedSheetRows.forEach((row, index) => {
     try {
-      allProducts.push(parseProductRow(row, index, cachedImgColIndex));
+      const p = parseProductRow(row, index, cachedImgColIndex);
+      allProducts.push(p);
     } catch (e) {
       console.error(`[CATALOG] Row ${index} failed:`, e);
     }
@@ -282,7 +436,7 @@ function renderCatalog() {
     });
   }
 
-  // Build 4 category columns
+  // Build category columns
   let columnsHTML = '';
   CATEGORIES.forEach((cat, idx) => {
     columnsHTML += buildCategoryColumn(cat, grouped[cat.id]);
@@ -316,9 +470,14 @@ async function fetchCatalog() {
 
   try {
     console.log('[CATALOG] Fetching from Google Sheets...');
-    const response = await fetch(SHEET_URL);
+    // Fetch Sheet 1 (main products) and Sheet 2 (sub-products) in parallel
+    const [response] = await Promise.all([
+      fetch(SHEET_URL),
+      fetchSheet2()
+    ]);
+    if (!response.ok) throw new Error(`Sheet 1 request failed (${response.status})`);
     const text = await response.text();
-    const jsonData = JSON.parse(text.substring(47, text.length - 2));
+    const jsonData = parseSheetResponse(text);
     const rows = jsonData.table.rows;
 
     console.log(`[CATALOG] ✓ Loaded ${rows.length} products`);
