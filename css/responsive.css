@@ -310,8 +310,14 @@
     height: 36px;
     font-size: 1rem;
   }
-  .collections-columns.view-all .slider-arrow-left { left: -10px; }
-  .collections-columns.view-all .slider-arrow-right { right: -10px; }
+
+  .collections-columns.view-all .slider-arrow-left {
+    left: -10px;
+  }
+
+  .collections-columns.view-all .slider-arrow-right {
+    right: -10px;
+  }
 
   .product-grid {
     grid-template-columns: 1fr 1fr;
@@ -470,7 +476,7 @@
   }
 
   .collection-column-items {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .collections-columns.view-all .product-card {
@@ -482,11 +488,17 @@
     height: 32px;
     font-size: .85rem;
   }
-  .collections-columns.view-all .slider-arrow-left { left: -5px; }
-  .collections-columns.view-all .slider-arrow-right { right: -5px; }
+
+  .collections-columns.view-all .slider-arrow-left {
+    left: -5px;
+  }
+
+  .collections-columns.view-all .slider-arrow-right {
+    right: -5px;
+  }
 
   .product-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .how-steps {
@@ -610,5 +622,144 @@
   .modal-add-cart-btn {
     font-size: .72rem;
     padding: .75rem 1rem;
+  }
+}
+
+/* ============================================================
+   Modern mobile and tablet refinements
+   Target ranges: phones 360–767px, tablets 768–1024px
+   ============================================================ */
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .hero {
+    min-height: 100svh;
+  }
+
+  .hero-left {
+    padding: clamp(3rem, 5vw, 4rem) clamp(2rem, 4vw, 3rem);
+  }
+}
+
+/* 10.9–11-inch tablets in portrait (820–834 CSS px). */
+@media (min-width: 769px) and (max-width: 900px) {
+  section {
+    padding: 4.5rem clamp(2.5rem, 5vw, 3rem);
+  }
+
+  .inspi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .line-cta {
+    flex-direction: row;
+    align-items: center;
+    padding: 2.5rem clamp(2.5rem, 5vw, 3rem);
+    text-align: left;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Keep the hero image proportionate to modern phone viewports. */
+  .hero {
+    min-height: auto;
+    padding-top: 66px;
+  }
+
+  .hero-right {
+    min-height: min(56svh, 480px);
+  }
+
+  /* Give icon-only controls a reliable touch target without changing their visuals. */
+  .nav-hamburger {
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    top: .4rem;
+    right: .5rem;
+  }
+
+  .cart-nav-btn {
+    width: 44px;
+    height: 44px;
+    margin-right: 3rem;
+  }
+
+  .modal-close,
+  .cart-drawer-close {
+    width: 44px;
+    height: 44px;
+  }
+
+  .product-modal {
+    max-height: calc(100dvh - 2rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-hamburger {
+    --hamburger-size: 20px;
+    padding: 12px;
+    top: .25rem;
+    right: .25rem;
+  }
+
+  .cart-nav-btn {
+    width: 44px;
+    height: 44px;
+    margin-right: 3rem;
+  }
+
+  .cart-toast {
+    width: min(calc(100vw - 2rem), 26rem);
+    white-space: normal;
+    text-align: center;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* 6.1–6.7-inch phones commonly use 390–430 CSS px wide viewports. */
+@media (min-width: 375px) and (max-width: 430px) {
+  .hero-left {
+    padding-left: clamp(1rem, 4vw, 1.5rem);
+    padding-right: clamp(1rem, 4vw, 1.5rem);
+  }
+
+  .hero-right {
+    min-height: min(58svh, 500px);
+  }
+}
+
+/* Keep two product columns on standard 360px+ phones; use one column only below that. */
+@media (max-width: 359px) {
+  .collection-column-items,
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+/* Keep navigation clear on 390px phones while preserving all language and cart controls. */
+@media (max-width: 400px) {
+  .nav-logo {
+    gap: 0;
+    font-size: 0;
+  }
+
+  .nav-logo-img {
+    height: 34px;
+  }
+}
+
+@supports (padding: max(0px)) {
+  @media (max-width: 768px) {
+    nav {
+      padding-left: max(1rem, env(safe-area-inset-left));
+      padding-right: max(1rem, env(safe-area-inset-right));
+    }
+
+    .float-group {
+      right: max(1.2rem, env(safe-area-inset-right));
+      bottom: max(1.2rem, env(safe-area-inset-bottom));
+    }
   }
 }

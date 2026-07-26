@@ -11,6 +11,8 @@
 html {
   scroll-behavior: smooth;
   font-family: var(--body-font), sans-serif;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -19,6 +21,13 @@ body {
   color: var(--text);
   font-weight: 300;
   overflow-x: hidden;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
 }
 
 /* ─── SECTION SHARED ─── */
