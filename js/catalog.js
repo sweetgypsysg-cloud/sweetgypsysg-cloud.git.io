@@ -58,29 +58,29 @@ function detectImageColumn(rows) {
 
 const CATEGORIES = [
   {
-    id: 'rings',
-    keywords: ['ring', 'แหวน'],
+    id: 'RINGS',
+    keywords: ['RING', 'แหวน'],
     names: { en: 'Rings', th: 'แหวน', zh: '戒指', ja: 'リング' },
     ph: 'ph-2'
   },
   {
-    id: 'necklace',
+    id: 'NECKLACES',
     names: { en: 'Necklace', th: 'สร้อยคอ', zh: '项链', ja: 'ネックレス' },
     ph: 'ph-3'
   },
   {
-    id: 'earrings',
+    id: 'EARRINGS',
     names: { en: 'Earrings', th: 'ต่างหู', zh: '耳环', ja: 'ピアス' },
     ph: 'ph-4'
   },
   {
-    id: 'bracelets',
+    id: 'BRACELETS',
     names: { en: 'Bracelets', th: 'กำไล', zh: '手镯', ja: 'ブレスレット' },
     ph: 'ph-5'
   },
   {
-    id: 'craft_toys',
-    keywords: ['craft toys', 'ของเล่นคราฟต์'],
+    id: 'CRAFT_TOYS',
+    keywords: ['CRAFT TOYS', 'ของเล่นคราฟต์'],
     names: { en: 'Craft toys', th: 'ของเล่นคราฟต์', zh: '手工艺玩具', ja: 'クラフトトイ' },
     ph: 'ph-1'
   }
@@ -114,8 +114,8 @@ function getDmLink(product) {
 /* ─── NORMALIZE Catalog_Type VALUE FROM SHEET ─── */
 function normalizeCatalogType(raw) {
   if (!raw) return null;
-  // Strip zero-width spaces and trim
-  const cleaned = raw.replace(/[\u200B-\u200D\uFEFF]/g, '').trim().toLowerCase();
+  // Strip zero-width spaces and trim, then uppercase to match category IDs
+  const cleaned = raw.replace(/[\u200B-\u200D\uFEFF]/g, '').trim().toUpperCase();
   // Match against known category IDs or keywords
   const match = CATEGORIES.find(cat =>
     cat.id === cleaned ||

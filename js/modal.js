@@ -26,16 +26,16 @@ function openProductModal(product) {
   const dotsContainer = document.getElementById('modal-dots');
   const leftBtn = document.getElementById('modal-arrow-left');
   const rightBtn = document.getElementById('modal-arrow-right');
-  
+
   // Preserve the magnifier button group before clearing
   const magnifierGroup = document.getElementById('magnifier-btn-group');
   imgWrapper.innerHTML = '';
   if (magnifierGroup) imgWrapper.appendChild(magnifierGroup);
   dotsContainer.innerHTML = '';
   currentModalSlide = 0;
-  
-  modalImages = product.images && product.images.length > 0 
-    ? product.images 
+
+  modalImages = product.images && product.images.length > 0
+    ? product.images
     : [product.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='];
 
   modalImages.forEach((imgUrl, index) => {
@@ -151,11 +151,11 @@ function initModal() {
   if (closeBtn) {
     closeBtn.addEventListener('click', closeProductModal);
   }
-  
+
   if (leftBtn) {
     leftBtn.addEventListener('click', prevModalSlide);
   }
-  
+
   if (rightBtn) {
     rightBtn.addEventListener('click', nextModalSlide);
   }
