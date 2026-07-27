@@ -8,6 +8,23 @@ let modalImages = [];
 let currentMainProduct = null;
 let currentModalProduct = null;
 
+/** Track whether the modal is already open (for smooth sub-product transitions) */
+let _modalIsOpen = false;
+
+/**
+ * Preload an image and resolve once it's ready (or on error).
+ * Resolves quickly if the image is already cached by the browser.
+ */
+function preloadImage(url) {
+  return new Promise(resolve => {
+    if (!url) return resolve();
+    const img = new Image();
+    img.onload = resolve;
+    img.onerror = resolve; // don't block on broken images
+    img.src = url;
+  });
+}
+
 function openProductModal(product) {
   const overlay = document.getElementById('product-modal-overlay');
   if (!overlay) return;
@@ -22,6 +39,9 @@ function openProductModal(product) {
   const parent = currentMainProduct || product;
   currentModalProduct = product;
 
+  // Detect if we're switching between sub-products within an already-open modal
+  const isSwitchingVariation = _modalIsOpen && overlay.classList.contains('active');
+
   // Fallback values from parent if product is missing fields (e.g. variation)
   const category = product.category || parent.category || '';
   const displayName = product.name || product.id || parent.name || parent.id || '';
@@ -30,95 +50,138 @@ function openProductModal(product) {
   const priceDisplay = rawPrice ? `${rawPrice} THB` : '';
   const desc = product.desc || parent.desc || t.modal_desc_default || '';
 
-  // Populate modal
-  document.getElementById('modal-cat').textContent = category;
-  document.getElementById('modal-name').textContent = displayName;
-  document.getElementById('modal-story').textContent = story;
-  document.getElementById('modal-price').textContent = priceDisplay;
-  document.getElementById('modal-desc').textContent = desc;
-
-  // Image Slider
-  const imgWrapper = document.getElementById('modal-img-wrapper');
-  const dotsContainer = document.getElementById('modal-dots');
-  const leftBtn = document.getElementById('modal-arrow-left');
-  const rightBtn = document.getElementById('modal-arrow-right');
-
-  // Preserve the magnifier button group before clearing
-  const magnifierGroup = document.getElementById('magnifier-btn-group');
-  imgWrapper.innerHTML = '';
-  if (magnifierGroup) imgWrapper.appendChild(magnifierGroup);
-  dotsContainer.innerHTML = '';
-  currentModalSlide = 0;
-
-  modalImages = product.images && product.images.length > 0
+  // Resolve new images before touching the DOM
+  const newImages = product.images && product.images.length > 0
     ? product.images
     : [product.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='];
 
-  modalImages.forEach((imgUrl, index) => {
-    const img = document.createElement('img');
-    img.src = imgUrl;
-    img.alt = `${displayName} - image ${index + 1}`;
-    img.className = 'modal-product-img';
-    if (index === 0) setupImageError(img, product.id);
-    imgWrapper.appendChild(img);
+  // ── Core updater: applies text, images, links to the modal DOM ──
+  const applyModalContent = () => {
+    // Populate text fields
+    document.getElementById('modal-cat').textContent = category;
+    document.getElementById('modal-name').textContent = displayName;
+    document.getElementById('modal-story').textContent = story;
+    document.getElementById('modal-price').textContent = priceDisplay;
+    document.getElementById('modal-desc').textContent = desc;
 
-    const dot = document.createElement('span');
-    dot.className = index === 0 ? 'modal-dot active' : 'modal-dot';
-    dot.addEventListener('click', () => goToModalSlide(index));
-    dotsContainer.appendChild(dot);
-  });
+    // Image Slider
+    const imgWrapper = document.getElementById('modal-img-wrapper');
+    const dotsContainer = document.getElementById('modal-dots');
+    const leftBtn = document.getElementById('modal-arrow-left');
+    const rightBtn = document.getElementById('modal-arrow-right');
 
-  if (modalImages.length > 1) {
-    leftBtn.style.display = 'flex';
-    rightBtn.style.display = 'flex';
-    dotsContainer.style.display = 'flex';
+    // Preserve the magnifier button group before clearing
+    const magnifierGroup = document.getElementById('magnifier-btn-group');
+    imgWrapper.innerHTML = '';
+    if (magnifierGroup) imgWrapper.appendChild(magnifierGroup);
+    dotsContainer.innerHTML = '';
+    currentModalSlide = 0;
+
+    modalImages = newImages;
+
+    modalImages.forEach((imgUrl, index) => {
+      const img = document.createElement('img');
+      img.src = imgUrl;
+      img.alt = `${displayName} - image ${index + 1}`;
+      img.className = 'modal-product-img';
+      if (index === 0) setupImageError(img, product.id);
+      imgWrapper.appendChild(img);
+
+      const dot = document.createElement('span');
+      dot.className = index === 0 ? 'modal-dot active' : 'modal-dot';
+      dot.addEventListener('click', () => goToModalSlide(index));
+      dotsContainer.appendChild(dot);
+    });
+
+    if (modalImages.length > 1) {
+      leftBtn.style.display = 'flex';
+      rightBtn.style.display = 'flex';
+      dotsContainer.style.display = 'flex';
+    } else {
+      leftBtn.style.display = 'none';
+      rightBtn.style.display = 'none';
+      dotsContainer.style.display = 'none';
+    }
+
+    updateModalSlider();
+
+    // ── Dynamic DM link based on DM_Type column from Google Sheet ──
+    const dmType = (product.dmType || parent.dmType || 'whatsapp').toLowerCase().trim();
+
+    // WhatsApp button — always uses WhatsApp link
+    const waMsg = currentLang === 'th'
+      ? `สวัสดีค่ะ สนใจสั่งซื้อสินค้า: ${displayName} (รหัส: ${product.id})`
+      : `Hello, I'm interested in ordering: ${displayName} (ID: ${product.id})`;
+    document.getElementById('modal-wa-btn').href = `https://wa.me/66645195663?text=${encodeURIComponent(waMsg)}`;
+
+    // Line button
+    const lineBtn = document.getElementById('modal-line-btn');
+    if (dmType === 'instagram') {
+      lineBtn.href = DM_LINKS.instagram(product);
+    } else if (dmType === 'facebook') {
+      lineBtn.href = DM_LINKS.facebook(product);
+    } else {
+      lineBtn.href = DM_LINKS.line(product);
+    }
+
+    // ── Add to Cart button in modal ──
+    const modalCartBtn = document.getElementById('modal-add-cart');
+    if (modalCartBtn) {
+      modalCartBtn.classList.remove('added');
+      const cartBtnText = modalCartBtn.querySelector('span');
+      if (cartBtnText) cartBtnText.textContent = t.cart_add || 'Add to Cart';
+    }
+
+    // Activate magnifier on the first image after DOM render
+    if (typeof activateModalMagnifier === 'function') {
+      activateModalMagnifier();
+    }
+
+    // ── Render Sub-Products from Sheet 2 ──
+    renderModalSubProducts(parent, product);
+  };
+
+  if (isSwitchingVariation) {
+    // ── SMOOTH TRANSITION: crossfade when switching sub-products ──
+    const infoSide = overlay.querySelector('.modal-info-side');
+    const imgSide = overlay.querySelector('.modal-img-side');
+
+    // Fade out both sides
+    if (infoSide) infoSide.classList.add('modal-content-exit');
+    if (imgSide) imgSide.classList.add('modal-content-exit');
+
+    // Preload the primary image, then swap content
+    const preloadPromise = preloadImage(newImages[0]);
+    const minDelay = new Promise(r => setTimeout(r, 180)); // min fade-out duration
+
+    Promise.all([preloadPromise, minDelay]).then(() => {
+      applyModalContent();
+
+      // Fade in with fresh content
+      if (infoSide) {
+        infoSide.classList.remove('modal-content-exit');
+        infoSide.classList.add('modal-content-enter');
+      }
+      if (imgSide) {
+        imgSide.classList.remove('modal-content-exit');
+        imgSide.classList.add('modal-content-enter');
+      }
+
+      // Clean up animation classes after transition completes
+      setTimeout(() => {
+        if (infoSide) infoSide.classList.remove('modal-content-enter');
+        if (imgSide) imgSide.classList.remove('modal-content-enter');
+      }, 350);
+    });
   } else {
-    leftBtn.style.display = 'none';
-    rightBtn.style.display = 'none';
-    dotsContainer.style.display = 'none';
+    // ── FIRST OPEN: apply content immediately, then show modal ──
+    applyModalContent();
+
+    overlay.classList.add('active');
+    document.body.classList.add('product-modal-open');
+    document.body.style.overflow = 'hidden';
+    _modalIsOpen = true;
   }
-
-  updateModalSlider();
-
-  // ── Dynamic DM link based on DM_Type column from Google Sheet ──
-  const dmType = (product.dmType || parent.dmType || 'whatsapp').toLowerCase().trim();
-
-  // WhatsApp button — always uses WhatsApp link
-  const waMsg = currentLang === 'th'
-    ? `สวัสดีค่ะ สนใจสั่งซื้อสินค้า: ${displayName} (รหัส: ${product.id})`
-    : `Hello, I'm interested in ordering: ${displayName} (ID: ${product.id})`;
-  document.getElementById('modal-wa-btn').href = `https://wa.me/66645195663?text=${encodeURIComponent(waMsg)}`;
-
-  // Line button
-  const lineBtn = document.getElementById('modal-line-btn');
-  if (dmType === 'instagram') {
-    lineBtn.href = DM_LINKS.instagram(product);
-  } else if (dmType === 'facebook') {
-    lineBtn.href = DM_LINKS.facebook(product);
-  } else {
-    lineBtn.href = DM_LINKS.line(product);
-  }
-
-  // ── Add to Cart button in modal ──
-  const modalCartBtn = document.getElementById('modal-add-cart');
-  if (modalCartBtn) {
-    modalCartBtn.classList.remove('added');
-    const cartBtnText = modalCartBtn.querySelector('span');
-    if (cartBtnText) cartBtnText.textContent = t.cart_add || 'Add to Cart';
-  }
-
-  // Show modal
-  overlay.classList.add('active');
-  document.body.classList.add('product-modal-open');
-  document.body.style.overflow = 'hidden';
-
-  // Activate magnifier on the first image after DOM render
-  if (typeof activateModalMagnifier === 'function') {
-    activateModalMagnifier();
-  }
-
-  // ── Render Sub-Products from Sheet 2 ──
-  renderModalSubProducts(parent, product);
 }
 
 function closeProductModal() {
@@ -128,6 +191,7 @@ function closeProductModal() {
   document.body.classList.remove('product-modal-open');
   document.body.style.overflow = '';
   currentMainProduct = null;
+  _modalIsOpen = false;
 }
 
 function goToModalSlide(index) {
@@ -286,6 +350,11 @@ function renderModalSubProducts(parentProduct, activeSubProduct) {
   grid.querySelectorAll('.modal-sub-card').forEach(card => {
     card.addEventListener('click', () => {
       try {
+        // Prevent rapid double-clicks from causing animation glitches
+        if (card.dataset.switching === 'true') return;
+        card.dataset.switching = 'true';
+        setTimeout(() => { card.dataset.switching = 'false'; }, 400);
+
         const subProduct = JSON.parse(decodeURIComponent(card.dataset.subProduct));
         openProductModal(subProduct);
       } catch (err) {
