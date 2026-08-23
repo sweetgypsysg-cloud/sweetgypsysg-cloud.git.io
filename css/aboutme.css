@@ -74,10 +74,12 @@
   position: absolute;
   inset: 0;
   background-image: url('https://res.cloudinary.com/dbc2ma9xe/image/upload/v1784448869/images_6_gyp1au.jpg');
-  background-size: 80%; /* Adjust size of watermark */
+  background-size: 80%;
+  /* Adjust size of watermark */
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.08; /* Faded watermark background */
+  opacity: 0.08;
+  /* Faded watermark background */
   z-index: 0;
   pointer-events: none;
   mix-blend-mode: multiply;
@@ -256,6 +258,11 @@
 
 .aboutme-section-body p:last-child {
   margin-bottom: 0;
+}
+
+.aboutme-more-btn {
+  margin-top: 1.8rem;
+  display: inline-block;
 }
 
 .aboutme-section-quote {

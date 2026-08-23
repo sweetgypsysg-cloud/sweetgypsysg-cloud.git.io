@@ -57,6 +57,11 @@ function applyLang(lang) {
   if (typeof renderCatalog === 'function' && cachedSheetRows) {
     renderCatalog();
   }
+
+  // Update Lightbox badge if open
+  if (typeof updateMoreLightboxContent === 'function') {
+    updateMoreLightboxContent();
+  }
 }
 
 /* ─── PUBLIC: called programmatically or via event listener ─── */

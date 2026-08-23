@@ -6,9 +6,9 @@
 (function () {
   'use strict';
 
-  const trigger   = document.getElementById('about-me-trigger');
-  const overlay   = document.getElementById('aboutme-overlay');
-  const closeBtn  = document.getElementById('aboutme-close');
+  const trigger = document.getElementById('about-me-trigger');
+  const overlay = document.getElementById('aboutme-overlay');
+  const closeBtn = document.getElementById('aboutme-close');
 
   if (!trigger || !overlay || !closeBtn) return;
 
