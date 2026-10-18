@@ -337,7 +337,7 @@ function renderModalSubProducts(parentProduct, activeSubProduct) {
         } else {
           card.classList.remove('active-sub');
         }
-      } catch (e) {}
+      } catch (e) { }
     });
   }
 

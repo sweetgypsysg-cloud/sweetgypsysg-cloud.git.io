@@ -8,7 +8,7 @@
   // ── MORE.HTML GALLERY DATA ──
   const MORE_GALLERY_ITEMS = [
     { src: 'img/S__2064391.jpg', badgeKey: 'more_badge_1', fallbackBadge: '✦ "Woodcut' },
-    { src: 'img/S__2064392.jpg', badgeKey: 'more_badge_2', fallbackBadge: '✦ Passion & Art' },
+    { src: 'img/artist-exhibition.jpg', badgeKey: 'more_badge_2', fallbackBadge: '✦ Passion & Art' },
     { src: 'img/S__2064403.jpg', badgeKey: 'more_badge_3', fallbackBadge: '✦ Natural Textures' },
     { src: 'img/S__2064402_0.jpg', badgeKey: 'more_badge_4', fallbackBadge: '✦ Unique Craft' },
     { src: 'img/S__2064400_0.jpg', badgeKey: 'more_badge_5', fallbackBadge: '✦ Memories of Time' },
