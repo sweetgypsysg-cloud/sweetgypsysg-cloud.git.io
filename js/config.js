@@ -9,5 +9,8 @@
    ============================================================ */
 
 const SITE_CONFIG = {
-  web3formsAccessKey: '5a80bf1a-b8c4-4432-a36a-a2ea9b21797f'
+  web3formsAccessKey: '5a80bf1a-b8c4-4432-a36a-a2ea9b21797f',
+  lineId: '@730bkzck',
+  lineUrl: 'https://line.me/R/ti/p/@730bkzck',
+  lineMessageUrl: 'https://line.me/R/oaMessage/@730bkzck/?'
 };

@@ -62,7 +62,12 @@ function parseSheetResponse(responseText) {
   if (start === -1 || end === -1 || end < start) {
     throw new Error('Google Sheets returned an unreadable response.');
   }
-  return JSON.parse(responseText.slice(start, end + 1));
+  const parsed = JSON.parse(responseText.slice(start, end + 1));
+  if (parsed.status === 'error') {
+    const errMsg = (parsed.errors && parsed.errors[0] && parsed.errors[0].message) || 'Google Sheets API query error';
+    throw new Error(`Google Sheets API: ${errMsg}`);
+  }
+  return parsed;
 }
 
 function setupImageError(imgElement, productId) {
@@ -80,15 +85,16 @@ function setupImageError(imgElement, productId) {
 
 /* ─── DETECT IMAGE COLUMN ─── */
 function detectImageColumn(rows) {
-  if (!rows || rows.length === 0) return 6;
+  if (!rows || rows.length === 0) return 3;
   const firstRow = rows[0].c;
+  if (!firstRow) return 3;
   for (let i = 0; i < firstRow.length; i++) {
     const val = firstRow[i]?.v || '';
     if (typeof val === 'string' && (val.includes('http') || val.includes('data:image'))) {
       return i;
     }
   }
-  return 6;
+  return 3;
 }
 
 /* ============================================================
@@ -132,7 +138,10 @@ const DM_LINKS = {
     const msg = currentLang === 'th'
       ? `สวัสดีค่ะ สนใจสินค้า: ${product.name} (รหัส: ${product.id})`
       : `Hello, I'm interested in: ${product.name} (ID: ${product.id})`;
-    return `https://line.me/R/oaMessage/@185ijvvm/?${encodeURIComponent(msg)}`;
+    const lineBase = (typeof SITE_CONFIG !== 'undefined' && SITE_CONFIG.lineMessageUrl)
+      ? SITE_CONFIG.lineMessageUrl
+      : 'https://line.me/R/oaMessage/@730bkzck/?';
+    return `${lineBase}${encodeURIComponent(msg)}`;
   },
   whatsapp: (product) => {
     const msg = currentLang === 'th'
@@ -262,12 +271,13 @@ async function fetchSheet2() {
     if (!response.ok) throw new Error(`Sheet 2 request failed (${response.status})`);
     const text = await response.text();
     const jsonData = parseSheetResponse(text);
-    const rows = jsonData.table.rows;
+    const rows = (jsonData && jsonData.table && Array.isArray(jsonData.table.rows)) ? jsonData.table.rows : [];
 
     cachedSheet2Products = [];
     rows.forEach((row, index) => {
       try {
-        cachedSheet2Products.push(parseSubProductRow(row, index));
+        const sub = parseSubProductRow(row, index);
+        if (sub) cachedSheet2Products.push(sub);
       } catch (e) {
         console.error(`[SHEET2] Row ${index} failed:`, e);
       }
@@ -478,7 +488,10 @@ async function fetchCatalog() {
     if (!response.ok) throw new Error(`Sheet 1 request failed (${response.status})`);
     const text = await response.text();
     const jsonData = parseSheetResponse(text);
-    const rows = jsonData.table.rows;
+    const rows = (jsonData && jsonData.table && Array.isArray(jsonData.table.rows)) ? jsonData.table.rows : [];
+    if (!rows.length) {
+      throw new Error('No product data rows found in Google Sheets response');
+    }
 
     console.log(`[CATALOG] ✓ Loaded ${rows.length} products`);
 

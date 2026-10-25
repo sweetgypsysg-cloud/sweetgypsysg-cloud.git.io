@@ -76,14 +76,13 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    var captchaRequired = !!this.querySelector('.h-captcha[data-captcha]');
+    var captchaContainer = this.querySelector('.h-captcha[data-captcha]');
     var hCaptchaInput = this.querySelector('[name="h-captcha-response"]');
+    var isCaptchaActive = !!(window.hcaptcha && captchaContainer && captchaContainer.children.length > 0);
 
-    if (captchaRequired) {
-      if (!hCaptchaInput || !hCaptchaInput.value) {
-        showStatus('error', 'Please complete the captcha verification before submitting.');
-        return;
-      }
+    if (isCaptchaActive && (!hCaptchaInput || !hCaptchaInput.value)) {
+      showStatus('error', 'Please complete the captcha verification before submitting.');
+      return;
     }
 
     if (!checkRateLimit()) {
@@ -98,8 +97,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     hideStatus();
 
+    var accessKey = (typeof SITE_CONFIG !== 'undefined' && SITE_CONFIG.web3formsAccessKey)
+      ? SITE_CONFIG.web3formsAccessKey
+      : (this.querySelector('[name="access_key"]')?.value || '5a80bf1a-b8c4-4432-a36a-a2ea9b21797f');
+
     var payload = {
-      access_key: SITE_CONFIG.web3formsAccessKey
+      access_key: accessKey
     };
 
     var formData = new FormData(this);
@@ -121,26 +124,29 @@ document.addEventListener('DOMContentLoaded', function () {
       },
       body: JSON.stringify(payload)
     })
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (data) {
-        if (data.success) {
+      .then(async function (response) {
+        var data;
+        try {
+          data = await response.json();
+        } catch (err) {
+          throw new Error('API server returned unexpected format (' + response.status + ')');
+        }
+
+        if (data && data.success) {
           form.reset();
-          if (typeof hcaptcha !== 'undefined') {
-            hcaptcha.reset();
+          if (typeof hcaptcha !== 'undefined' && hcaptcha.reset) {
+            try { hcaptcha.reset(); } catch (e) {}
           }
           recordSubmission();
           showSuccessPanel();
         } else {
-          var apiMsg = data.message || 'Unknown error';
+          var apiMsg = (data && data.message) || 'Submission failed';
           showStatus('error', 'Web3Forms: ' + apiMsg);
         }
       })
       .catch(function () {
         showStatus('error',
-          'A network error occurred. ' +
-          'Please check your internet connection and try again.'
+          'A submission error occurred. Please contact us directly via Line OA (@730bkzck) or WhatsApp.'
         );
       })
       .finally(function () {

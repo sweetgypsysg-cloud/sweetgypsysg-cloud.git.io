@@ -285,7 +285,10 @@ function checkoutLine() {
   if (cart.length === 0) return;
   const msg = generateOrderMessage();
   // Line OA message pre-fill URL format
-  const url = `https://line.me/R/oaMessage/@185ijvvm/?${encodeURIComponent(msg)}`;
+  const lineBase = (typeof SITE_CONFIG !== 'undefined' && SITE_CONFIG.lineMessageUrl)
+    ? SITE_CONFIG.lineMessageUrl
+    : 'https://line.me/R/oaMessage/@730bkzck/?';
+  const url = `${lineBase}${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
 }
 
